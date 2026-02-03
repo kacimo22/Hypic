@@ -18,7 +18,9 @@ You can run the example server as follows:
 
 .. code-block:: console
 
-cd \Hypic
+cd Hypic
+
+Then
 
 .. code-block:: console
 
