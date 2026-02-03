@@ -1,15 +1,3 @@
-Examples
-========
-
-After checking out the code using git you can run:
-
-.. code-block:: console
-
-   pip install . dnslib jinja2 starlette wsproto
-
-
-HTTP/3 server
-.............
 
 **Hypic** is a Python library that extends the existing `aioquic` QUIC implementation to provide **post-quantum security** while maintaining **backward compatibility**.  
 
