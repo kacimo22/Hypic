@@ -8,9 +8,6 @@ After checking out the code using git you can run:
    pip install . dnslib jinja2 starlette wsproto
 
 
-HTTP/3
-------
-
 HTTP/3 server
 .............
 
@@ -18,13 +15,15 @@ You can run the example server as follows:
 
 .. code-block:: console
 
-cd Hypic
+  cd Hypic
 
 Then
 
 .. code-block:: console
 
-python3 examples/http3_server.py --catalyst-config server_config.json
+  python3 examples/http3_server.py --catalyst-config server_config.json
+  
+
 
 HTTP/3 lgacy client
 .............
