@@ -31,26 +31,41 @@ Hypic also integrates **Catalyst certificates** for **post-quantum authenticatio
 
 ## Installation
 
-### From PyPI (after release)
-
-```bash
+.. code-block:: console
 pip install hypic
 
----
 
 ## Runing the protocol
+
 The server_config.json contains the server configuration.
+.. code-block:: console
 1- Get into the Hypic directory
-2- Run the command: source .venv/bin/activate
+
+2- Run the command:
+.. code-block:: console
+ source .venv/bin/activate
+
+3- Make an editable project
+.. code-block:: console
 3- pip install -e .
 
-4- Run the server: python3 examples/http3_server.py --catalyst-config server_config.json
-5- To run a legacy client: python3 examples/http3_client.py --insecure  https://localhost:4433/ 
-6-To run a PQ-aware client with initial handshake: 
-python3 examples/http3_client.py --insecure  https://localhost:4433/ --enable-pq  kyber768 --max-rpqh-period 3600 ## this run the client with initial hanshake, sending a clientHello with kyber768 public key.
+4- Run the server: 
+.. code-block:: console
+python3 examples/http3_server.py --catalyst-config server_config.json
+
+5- To run a legacy client:
+.. code-block:: console
+ python3 examples/http3_client.py --insecure  https://localhost:4433/ 
+ 
+6-To run a PQ-aware client with initial handshake: this run the client with initial hanshake, sending a clientHello with kyber768 public key.
+.. code-block:: console
+python3 examples/http3_client.py --insecure  https://localhost:4433/ --enable-pq  kyber768 --max-rpqh-period 3600 
+
 ----------------------------------------------------------------------------------------------------------
-7-A fter runing the PQ initial handshake, a session_ticket is stored at the Client for session resumption. The session_ticket contains a new server PQ public key. 
+7-A fter runing the PQ initial handshake, a session_ticket is stored at the Client for session resumption. 
+The session_ticket contains a new server PQ public key. 
 
-8-To run a PQ-aware client with resumed handshake: 
-python3 examples/http3_client.py --insecure  https://localhost:4433/ --enable-pq  kyber768 --max-rpqh-period 3600 --session-ticket ## this run the client with resumed hanshake, sending a clientHello with kyber768 public key.
+8-To run a PQ-aware client with resumed handshake:
 
+.. code-block:: console 
+python3 examples/http3_client.py --insecure  https://localhost:4433/ --enable-pq  kyber768 --max-rpqh-period 3600 --session-ticket 
