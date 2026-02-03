@@ -1,0 +1,32 @@
+Metadata-Version: 2.4
+Name: Hypic
+Version: 0.1.0
+Summary: Post-quantum enhanced QUIC based on aioquic
+Author: Amine Belkacem
+Author-email: imine.belkacem@gmail.com
+License: BSD-3-Clause
+Project-URL: Homepage, https://github.com/kacimo22/Hypic
+Project-URL: Repository, https://github.com/kacimo22/Hypic
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Topic :: Security :: Cryptography
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: aioquic
+Requires-Dist: certifi
+Requires-Dist: cryptography>=42.0.0
+Requires-Dist: pylsqpack<0.4.0,>=0.3.3
+Requires-Dist: pyopenssl>=24
+Requires-Dist: service-identity>=24.1.0
+Provides-Extra: dev
+Requires-Dist: coverage[toml]>=7.2.2; extra == "dev"
+Requires-Dist: typing_extensions; python_version < "3.10" and extra == "dev"
+Dynamic: author-email
+Dynamic: license-file

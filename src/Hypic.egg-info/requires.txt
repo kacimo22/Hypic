@@ -1,0 +1,12 @@
+aioquic
+certifi
+cryptography>=42.0.0
+pylsqpack<0.4.0,>=0.3.3
+pyopenssl>=24
+service-identity>=24.1.0
+
+[dev]
+coverage[toml]>=7.2.2
+
+[dev:python_version < "3.10"]
+typing_extensions

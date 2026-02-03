@@ -1,0 +1,719 @@
+{
+  "version": "3.0",
+  "server_name": "Catalyst TLS 1.3 Server with Key Sharing",
+  "description": "Configuration for 23 Catalyst certificates with shared keys across families",
+  
+  "directories": {
+    "certificates": "Certificates",
+    "keys": "Certificates",
+    "configs": "config",
+    "logs": "logs"
+  },
+  
+  "tls_settings": {
+    "min_version": "TLSv1.3",
+    "max_version": "TLSv1.3",
+    "enable_pq": true,
+    "pq_kem": "KYBER768",
+    "valid_time_rpqh": true,
+    "session_tickets": true,
+    "early_data": true,
+    "max_early_data": 16384
+  },
+  
+  "algorithm_preferences": {
+    "ed25519": [
+      "ED25519"
+    ],
+    "ed448": [
+      "ED448"
+    ],
+    "ecdsa" :[
+      "ECDSA_SECP256R1_SHA256",
+      "ECDSA_SECP384R1_SHA384",
+      "ECDSA_SECP521R1_SHA512"
+    ],
+    "rsa-pss-rsae" : [
+      "RSA_PSS_RSAE_SHA512",
+      "RSA_PSS_RSAE_SHA256",
+      "RSA_PSS_RSAE_SHA384"
+    ],
+    "rsa-pss-pss" : [
+      "RSA_PSS_PSS_SHA512",
+      "RSA_PSS_PSS_SHA384",
+      "RSA_PSS_PSS_SHA256"
+    ],
+    "rsa" : [
+      "RSA_PKCS1_SHA384",
+      "RSA_PKCS1_SHA512",
+      "RSA_PKCS1_SHA256"
+    ],
+    "classical_preference_order": ["rsa","rsa-pss-rsae", "rsa-pss-pss", "ecdsa", "ed448", "ed25519"],
+    "pq_preference_order": ["ML-DSA-87", "ML-DSA-65", "ML-DSA-44"],
+    "hash_preference_order": ["shake256", "sha512", "sha384", "sha256"]
+  },
+  
+  "key_sharing_families": {
+    "classical": {
+      "ed25519": {
+        "key_file": "classical_ed25519.pem",
+        "pub_file": "classical_pub_ed25519.pem",
+        "used_by": ["MLDSA44-Ed25519-SHA512", "MLDSA65-Ed25519-SHA512"]
+      },
+      "ed448": {
+        "key_file": "classical_ed448.pem",
+        "pub_file": "classical_pub_ed448.pem",
+        "used_by": ["MLDSA65-Ed448-SHAKE256", "MLDSA87-Ed448-SHAKE256"]
+      },
+      "ecdsa-p256": {
+        "key_file": "classical_ecdsa_p256.pem",
+        "pub_file": "classical_pub_ecdsa_p256.pem",
+        "used_by": ["MLDSA44-ECDSA-P256-SHA256", "MLDSA65-ECDSA-P256-SHA512"]
+      },
+      "ecdsa-p384": {
+        "key_file": "classical_ecdsa_p384.pem",
+        "pub_file": "classical_pub_ecdsa_p384.pem",
+        "used_by": ["MLDSA65-ECDSA-P384-SHA384", "MLDSA65-ECDSA-P384-SHA512", "MLDSA87-ECDSA-P384-SHA512"]
+      },
+      "ecdsa-p521": {
+        "key_file": "classical_ecdsa_p521.pem",
+        "pub_file": "classical_pub_ecdsa_p521.pem",
+        "used_by": ["MLDSA87-ECDSA-P521-SHA512"]
+      },
+      "rsa-2048-pss": {
+        "key_file": "classical_rsa2048_pss.pem",
+        "pub_file": "classical_pub_rsa2048_pss.pem",
+        "used_by": ["MLDSA44-RSA2048-PSS-SHA256"]
+      },
+      "rsa-3072-pss": {
+        "key_file": "classical_rsa3072_pss.pem",
+        "pub_file": "classical_pub_rsa3072_pss.pem",
+        "used_by": ["MLDSA44-RSA3072-PSS-SHA384", "MLDSA65-RSA3072-PSS-SHA512", "MLDSA87-RSA3072-PSS-SHA512"]
+      },
+      "rsa-4096-pss": {
+        "key_file": "classical_rsa4096_pss.pem",
+        "pub_file": "classical_pub_rsa4096_pss.pem",
+        "used_by": ["MLDSA65-RSA4096-PSS-SHA512", "MLDSA87-RSA4096-PSS-SHA512"]
+      },
+      "rsa-2048-pss-pss": {
+        "key_file": "classical_rsa2048_pss_pss.pem",
+        "pub_file": "classical_pub_rsa2048_pss_pss.pem",
+        "used_by": ["MLDSA44-RSA2048-PSS-PSS-SHA256"]
+      },
+      "rsa-4096-pss-pss": {
+        "key_file": "classical_rsa4096_pss_pss.pem",
+        "pub_file": "classical_pub_rsa4096_pss_pss.pem",
+        "used_by": ["MLDSA44-RSA4096-PSS-PSS-SHA384", "MLDSA65-RSA4096-PSS-PSS-SHA512"]
+      },
+      "rsa-2048-pkcs1": {
+        "key_file": "classical_rsa2048_pkcs1.pem",
+        "pub_file": "classical_pub_rsa2048_pkcs1.pem",
+        "used_by": ["MLDSA44-RSA2048-PKCS15-SHA256"]
+      },
+      "rsa-3072-pkcs1": {
+        "key_file": "classical_rsa3072_pkcs1.pem",
+        "pub_file": "classical_pub_rsa3072_pkcs1.pem",
+        "used_by": ["MLDSA44-RSA3072-PKCS15-SHA256", "MLDSA65-RSA3072-PKCS15-SHA384"]
+      },
+      "rsa-4096-pkcs1": {
+        "key_file": "classical_rsa4096_pkcs1.pem",
+        "pub_file": "classical_pub_rsa4096_pkcs1.pem",
+        "used_by": ["MLDSA65-RSA4096-PKCS15-SHA512"]
+      }
+    },
+    
+    "pq": {
+      "mldsa44": {
+        "key_file": "pq_priv_mldsa44.pem",
+        "pub_file": "pq_pub_mldsa44.pem",
+        "pub_der_file": "pq_pub_mldsa44.der",
+        "used_by": [
+          "MLDSA44-Ed25519-SHA512",
+          "MLDSA44-ECDSA-P256-SHA256",
+          "MLDSA44-RSA2048-PSS-SHA256",
+          "MLDSA44-RSA3072-PSS-SHA384",
+          "MLDSA44-RSA2048-PSS-PSS-SHA256",
+          "MLDSA44-RSA4096-PSS-PSS-SHA384",
+          "MLDSA44-RSA2048-PKCS15-SHA256",
+          "MLDSA44-RSA3072-PKCS15-SHA256"
+        ]
+      },
+      "mldsa65": {
+        "key_file": "pq_priv_mldsa65.pem",
+        "pub_file": "pq_pub_mldsa65.pem",
+        "pub_der_file": "pq_pub_mldsa65.der",
+        "used_by": [
+          "MLDSA65-Ed25519-SHA512",
+          "MLDSA65-Ed448-SHAKE256",
+          "MLDSA65-ECDSA-P256-SHA512",
+          "MLDSA65-ECDSA-P384-SHA384",
+          "MLDSA65-ECDSA-P384-SHA512",
+          "MLDSA65-RSA3072-PSS-SHA512",
+          "MLDSA65-RSA4096-PSS-SHA512",
+          "MLDSA65-RSA4096-PSS-PSS-SHA512",
+          "MLDSA65-RSA3072-PKCS15-SHA384",
+          "MLDSA65-RSA4096-PKCS15-SHA512"
+        ]
+      },
+      "mldsa87": {
+        "key_file": "pq_priv_mldsa87.pem",
+        "pub_file": "pq_pub_mldsa87.pem",
+        "pub_der_file": "pq_pub_mldsa87.der",
+        "used_by": [
+          "MLDSA87-Ed448-SHAKE256",
+          "MLDSA87-ECDSA-P384-SHA512",
+          "MLDSA87-ECDSA-P521-SHA512",
+          "MLDSA87-RSA3072-PSS-SHA512",
+          "MLDSA87-RSA4096-PSS-SHA512"
+        ]
+      }
+    }
+  },
+  
+  "catalyst_configs": {
+    "MLDSA44-Ed25519-SHA512": {
+      "config_id": "cert_01",
+      "tls_code": 2055,
+      "classical_alg": "ed25519",
+      "pq_alg": "ML-DSA-44",
+      "classical_alg_family": "ed25519",
+      "pq_key_family": "mldsa44",
+      "tls_name": "ED25519",
+      "key_size": 256,
+      "hash_alg": "sha512",
+      "padding": null,
+      "oid": "1.3.6.1.5.5.7.6.39",
+      "common_name": "CATALYST-MLDSA44-Ed25519-SHA512",
+      "cert_suffix": "_MLDSA44_Ed25519_SHA512",
+      "cert_file": "catalyst_cert_MLDSA44_Ed25519_SHA512.pem",
+      "security_level": 128,
+      "enabled": true,
+      "priority": 20,
+      "performance_score": 95
+    },
+    
+    "MLDSA65-Ed25519-SHA512": {
+      "config_id": "cert_02",
+      "tls_code": 2055,
+      "classical_alg": "ed25519",
+      "pq_alg": "ML-DSA-65",
+      "classical_alg_family": "ed25519",
+      "pq_key_family": "mldsa65",
+      "tls_name": "ED25519",
+      "key_size": 256,
+      "hash_alg": "sha512",
+      "padding": null,
+      "oid": "1.3.6.1.5.5.7.6.48",
+      "common_name": "CATALYST-MLDSA65-Ed25519-SHA512",
+      "cert_suffix": "_MLDSA65_Ed25519_SHA512",
+      "cert_file": "catalyst_cert_MLDSA65_Ed25519_SHA512.pem",
+      "security_level": 128,
+      "enabled": true,
+      "priority": 15,
+      "performance_score": 85
+    },
+    
+    "MLDSA65-Ed448-SHAKE256": {
+      "config_id": "cert_03",
+      "tls_code": 2056,
+      "classical_alg": "ed448",
+      "pq_alg": "ML-DSA-65",
+      "classical_alg_family": "ed448",
+      "pq_key_family": "mldsa65",
+      "tls_name": "ED448",
+      "key_size": 456,
+      "hash_alg": "shake256",
+      "padding": null,
+      "oid": "1.3.6.1.4.1.2.267.999.1.3",
+      "common_name": "CATALYST-MLDSA65-Ed448-SHAKE256",
+      "cert_suffix": "_MLDSA65_Ed448_SHAKE256",
+      "cert_file": "catalyst_cert_MLDSA65_Ed448_SHAKE256.pem",
+      "security_level": 192,
+      "enabled": true,
+      "priority": 8,
+      "performance_score": 75
+    },
+    
+    "MLDSA87-Ed448-SHAKE256": {
+      "config_id": "cert_04",
+      "tls_code": 2056,
+      "classical_alg": "ed448",
+      "pq_alg": "ML-DSA-87",
+      "classical_alg_family": "ed448",
+      "pq_key_family": "mldsa87",
+      "tls_name": "ED448",
+      "key_size": 456,
+      "hash_alg": "shake256",
+      "padding": null,
+      "oid": "1.3.6.1.5.5.7.6.51",
+      "common_name": "CATALYST-MLDSA87-Ed448-SHAKE256",
+      "cert_suffix": "_MLDSA87_Ed448_SHAKE256",
+      "cert_file": "catalyst_cert_MLDSA87_Ed448_SHAKE256.pem",
+      "security_level": 192,
+      "enabled": true,
+      "priority": 12,
+      "performance_score": 65
+    },
+    
+    "MLDSA44-ECDSA-P256-SHA256": {
+      "config_id": "cert_05",
+      "tls_code": 1027,
+      "classical_alg": "ecdsa",
+      "pq_alg": "ML-DSA-44",
+      "classical_alg_family": "ecdsa-p256",
+      "pq_key_family": "mldsa44",
+      "tls_name": "ECDSA-P256-SHA256",
+      "curve": "secp256r1",
+      "key_size": 256,
+      "hash_alg": "sha256",
+      "padding": null,
+      "oid": "1.3.6.1.5.5.7.6.40",
+      "common_name": "CATALYST-MLDSA44-ECDSA-P256-SHA256",
+      "cert_suffix": "_MLDSA44_ECDSA_P256_SHA256",
+      "cert_file": "catalyst_cert_MLDSA44_ECDSA_P256_SHA256.pem",
+      "security_level": 128,
+      "enabled": true,
+      "priority": 18,
+      "performance_score": 90
+    },
+    
+    "MLDSA65-ECDSA-P256-SHA512": {
+      "config_id": "cert_06",
+      "tls_code": 24635,
+      "classical_alg": "ecdsa",
+      "pq_alg": "ML-DSA-65",
+      "classical_alg_family": "ecdsa-p256",
+      "pq_key_family": "mldsa65",
+      "tls_name": "ECDSA-P256-SHA512",
+      "curve": "secp256r1",
+      "key_size": 256,
+      "hash_alg": "sha512",
+      "padding": null,
+      "oid": "1.3.6.1.5.5.7.6.45",
+      "common_name": "CATALYST-MLDSA65-ECDSA-P256-SHA512",
+      "cert_suffix": "_MLDSA65_ECDSA_P256_SHA512",
+      "cert_file": "catalyst_cert_MLDSA65_ECDSA_P256_SHA512.pem",
+      "security_level": 128,
+      "enabled": false,
+      "priority": 16,
+      "performance_score": 80
+    },
+    
+    "MLDSA65-ECDSA-P384-SHA384": {
+      "config_id": "cert_07",
+      "tls_code": 1283,
+      "classical_alg": "ecdsa",
+      "pq_alg": "ML-DSA-65",
+      "classical_alg_family": "ecdsa-p384",
+      "pq_key_family": "mldsa65",
+      "tls_name": "ECDSA-P384-SHA384",
+      "curve": "secp384r1",
+      "key_size": 384,
+      "hash_alg": "sha384",
+      "padding": null,
+      "oid": "1.3.6.1.4.1.2.267.999.2.1",
+      "common_name": "CATALYST-MLDSA65-ECDSA-P384-SHA384",
+      "cert_suffix": "_MLDSA65_ECDSA_P384_SHA384",
+      "cert_file": "catalyst_cert_MLDSA65_ECDSA_P384_SHA384.pem",
+      "security_level": 192,
+      "enabled": true,
+      "priority": 14,
+      "performance_score": 70
+    },
+    
+    "MLDSA65-ECDSA-P384-SHA512": {
+      "config_id": "cert_08",
+      "tls_code": 24634,
+      "classical_alg": "ecdsa",
+      "pq_alg": "ML-DSA-65",
+      "classical_alg_family": "ecdsa-p384",
+      "pq_key_family": "mldsa65",
+      "tls_name": "ECDSA-P384-SHA512",
+      "curve": "secp384r1",
+      "key_size": 384,
+      "hash_alg": "sha512",
+      "padding": null,
+      "oid": "1.3.6.1.5.5.7.6.46",
+      "common_name": "CATALYST-MLDSA65-ECDSA-P384-SHA512",
+      "cert_suffix": "_MLDSA65_ECDSA_P384_SHA512",
+      "cert_file": "catalyst_cert_MLDSA65_ECDSA_P384_SHA512.pem",
+      "security_level": 192,
+      "enabled": false,
+      "priority": 10,
+      "performance_score": 68
+    },
+    
+    "MLDSA87-ECDSA-P384-SHA512": {
+      "config_id": "cert_09",
+      "tls_code": 1546,
+      "classical_alg": "ecdsa",
+      "pq_alg": "ML-DSA-87",
+      "classical_alg_family": "ecdsa-p384",
+      "pq_key_family": "mldsa87",
+      "tls_name": "ECDSA-P384-SHA512",
+      "curve": "secp384r1",
+      "key_size": 384,
+      "hash_alg": "sha512",
+      "padding": null,
+      "oid": "1.3.6.1.5.5.7.6.49",
+      "common_name": "CATALYST-MLDSA87-ECDSA-P384-SHA512",
+      "cert_suffix": "_MLDSA87_ECDSA_P384_SHA512",
+      "cert_file": "catalyst_cert_MLDSA87_ECDSA_P384_SHA512.pem",
+      "security_level": 192,
+      "enabled": false,
+      "priority": 13,
+      "performance_score": 60
+    },
+    
+    "MLDSA87-ECDSA-P521-SHA512": {
+      "config_id": "cert_10",
+      "tls_code": 1539,
+      "classical_alg": "ecdsa",
+      "pq_alg": "ML-DSA-87",
+      "classical_alg_family": "ecdsa-p521",
+      "pq_key_family": "mldsa87",
+      "tls_name": "ECDSA-P521-SHA512",
+      "curve": "secp521r1",
+      "key_size": 521,
+      "hash_alg": "sha512",
+      "padding": null,
+      "oid": "1.3.6.1.5.5.7.6.54",
+      "common_name": "CATALYST-MLDSA87-ECDSA-P521-SHA512",
+      "cert_suffix": "_MLDSA87_ECDSA_P521_SHA512",
+      "cert_file": "catalyst_cert_MLDSA87_ECDSA_P521_SHA512.pem",
+      "security_level": 256,
+      "enabled": true,
+      "priority": 6,
+      "performance_score": 55
+    },
+    
+    "MLDSA44-RSA2048-PSS-SHA256": {
+      "config_id": "cert_11",
+      "tls_code": 2052,
+      "classical_alg": "rsa-pss-rsae",
+      "pq_alg": "ML-DSA-44",
+      "classical_alg_family": "rsa-2048-pss",
+      "pq_key_family": "mldsa44",
+      "tls_name": "RSA-PSS-RSAE-SHA256",
+      "key_size": 2048,
+      "hash_alg": "sha256",
+      "padding": "pss",
+      "oid": "1.3.6.1.5.5.7.6.37",
+      "common_name": "CATALYST-MLDSA44-RSA2048-PSS-SHA256",
+      "cert_suffix": "_MLDSA44_RSA2048_PSS_SHA256",
+      "cert_file": "catalyst_cert_MLDSA44_RSA2048_PSS_SHA256.pem",
+      "security_level": 112,
+      "enabled": true,
+      "priority": 22,
+      "performance_score": 85
+    },
+    
+    "MLDSA44-RSA3072-PSS-SHA384": {
+      "config_id": "cert_12",
+      "tls_code": 2053,
+      "classical_alg": "rsa-pss-rsae",
+      "pq_alg": "ML-DSA-44",
+      "classical_alg_family": "rsa-3072-pss",
+      "pq_key_family": "mldsa44",
+      "tls_name": "RSA-PSS-RSAE-SHA384",
+      "key_size": 3072,
+      "hash_alg": "sha384",
+      "padding": "pss",
+      "oid": "1.3.6.1.4.1.2.267.999.3.1",
+      "common_name": "CATALYST-MLDSA44-RSA3072-PSS-SHA384",
+      "cert_suffix": "_MLDSA44_RSA3072_PSS_SHA384",
+      "cert_file": "catalyst_cert_MLDSA44_RSA3072_PSS_SHA384.pem",
+      "security_level": 128,
+      "enabled": true,
+      "priority": 21,
+      "performance_score": 75
+    },
+    
+    "MLDSA65-RSA3072-PSS-SHA512": {
+      "config_id": "cert_13",
+      "tls_code": 2054,
+      "classical_alg": "rsa-pss-rsae",
+      "pq_alg": "ML-DSA-65",
+      "classical_alg_family": "rsa-3072-pss",
+      "pq_key_family": "mldsa65",
+      "tls_name": "RSA-PSS-RSAE-SHA512",
+      "key_size": 3072,
+      "hash_alg": "sha512",
+      "padding": "pss",
+      "oid": "1.3.6.1.5.5.7.6.41",
+      "common_name": "CATALYST-MLDSA65-RSA3072-PSS-SHA512",
+      "cert_suffix": "_MLDSA65_RSA3072_PSS_SHA512",
+      "cert_file": "catalyst_cert_MLDSA65_RSA3072_PSS_SHA512.pem",
+      "security_level": 128,
+      "enabled": true,
+      "priority": 19,
+      "performance_score": 70
+    },
+    
+    "MLDSA87-RSA3072-PSS-SHA512": {
+      "config_id": "cert_14",
+      "tls_code": 2054,
+      "classical_alg": "rsa-pss-rsae",
+      "pq_alg": "ML-DSA-87",
+      "classical_alg_family": "rsa-3072-pss",
+      "pq_key_family": "mldsa87",
+      "tls_name": "RSA-PSS-RSAE-SHA512",
+      "key_size": 3072,
+      "hash_alg": "sha512",
+      "padding": "pss",
+      "oid": "1.3.6.1.5.5.7.6.52",
+      "common_name": "CATALYST-MLDSA87-RSA3072-PSS-SHA512",
+      "cert_suffix": "_MLDSA87_RSA3072_PSS_SHA512",
+      "cert_file": "catalyst_cert_MLDSA87_RSA3072_PSS_SHA512.pem",
+      "security_level": 128,
+      "enabled": false,
+      "priority": 11,
+      "performance_score": 62
+    },
+    
+    "MLDSA65-RSA4096-PSS-SHA512": {
+      "config_id": "cert_15",
+      "tls_code": 2054,
+      "classical_alg": "rsa-pss-rsae",
+      "pq_alg": "ML-DSA-65",
+      "classical_alg_family": "rsa-4096-pss",
+      "pq_key_family": "mldsa65",
+      "tls_name": "RSA-PSS-RSAE-SHA512",
+      "key_size": 4096,
+      "hash_alg": "sha512",
+      "padding": "pss",
+      "oid": "1.3.6.1.5.5.7.6.43",
+      "common_name": "CATALYST-MLDSA65-RSA4096-PSS-SHA512",
+      "cert_suffix": "_MLDSA65_RSA4096_PSS_SHA512",
+      "cert_file": "catalyst_cert_MLDSA65_RSA4096_PSS_SHA512.pem",
+      "security_level": 140,
+      "enabled": true,
+      "priority": 9,
+      "performance_score": 65
+    },
+    
+    "MLDSA87-RSA4096-PSS-SHA512": {
+      "config_id": "cert_16",
+      "tls_code": 2054,
+      "classical_alg": "rsa-pss-rsae",
+      "pq_alg": "ML-DSA-87",
+      "classical_alg_family": "rsa-4096-pss",
+      "pq_key_family": "mldsa87",
+      "tls_name": "RSA-PSS-RSAE-SHA512",
+      "key_size": 4096,
+      "hash_alg": "sha512",
+      "padding": "pss",
+      "oid": "1.3.6.1.5.5.7.6.53",
+      "common_name": "CATALYST-MLDSA87-RSA4096-PSS-SHA512",
+      "cert_suffix": "_MLDSA87_RSA4096_PSS_SHA512",
+      "cert_file": "catalyst_cert_MLDSA87_RSA4096_PSS_SHA512.pem",
+      "security_level": 140,
+      "enabled": true,
+      "priority": 17,
+      "performance_score": 58
+    },
+    
+    "MLDSA44-RSA2048-PSS-PSS-SHA256": {
+      "config_id": "cert_17",
+      "tls_code": 2057,
+      "classical_alg": "rsa-pss-pss",
+      "pq_alg": "ML-DSA-44",
+      "classical_alg_family": "rsa-2048-pss-pss",
+      "pq_key_family": "mldsa44",
+      "tls_name": "RSA-PSS-PSS-SHA256",
+      "key_size": 2048,
+      "hash_alg": "sha256",
+      "padding": "pss",
+      "oid": "1.3.6.1.4.1.2.267.999.4.1",
+      "common_name": "CATALYST-MLDSA44-RSA2048-PSS-PSS-SHA256",
+      "cert_suffix": "_MLDSA44_RSA2048_PSS_PSS_SHA256",
+      "cert_file": "catalyst_cert_MLDSA44_RSA2048_PSS_PSS_SHA256.pem",
+      "security_level": 112,
+      "enabled": true,
+      "priority": 23,
+      "performance_score": 80
+    },
+    
+    "MLDSA44-RSA4096-PSS-PSS-SHA384": {
+      "config_id": "cert_18",
+      "tls_code": 2058,
+      "classical_alg": "rsa-pss-pss",
+      "pq_alg": "ML-DSA-44",
+      "classical_alg_family": "rsa-4096-pss-pss",
+      "pq_key_family": "mldsa44",
+      "tls_name": "RSA-PSS-PSS-SHA384",
+      "key_size": 4096,
+      "hash_alg": "sha384",
+      "padding": "pss",
+      "oid": "1.3.6.1.4.1.2.267.999.4.2",
+      "common_name": "CATALYST-MLDSA44-RSA4096-PSS-PSS-SHA384",
+      "cert_suffix": "_MLDSA44_RSA4096_PSS_PSS_SHA384",
+      "cert_file": "catalyst_cert_MLDSA44_RSA4096_PSS_PSS_SHA384.pem",
+      "security_level": 140,
+      "enabled": true,
+      "priority": 24,
+      "performance_score": 70
+    },
+    
+    "MLDSA65-RSA4096-PSS-PSS-SHA512": {
+      "config_id": "cert_19",
+      "tls_code": 2059,
+      "classical_alg": "rsa-pss-pss",
+      "pq_alg": "ML-DSA-65",
+      "classical_alg_family": "rsa-4096-pss-pss",
+      "pq_key_family": "mldsa65",
+      "tls_name": "RSA-PSS-PSS-SHA512",
+      "key_size": 4096,
+      "hash_alg": "sha512",
+      "padding": "pss",
+      "oid": "1.3.6.1.4.1.2.267.999.4.3",
+      "common_name": "CATALYST-MLDSA65-RSA4096-PSS-PSS-SHA512",
+      "cert_suffix": "_MLDSA65_RSA4096_PSS_PSS_SHA512",
+      "cert_file": "catalyst_cert_MLDSA65_RSA4096_PSS_PSS_SHA512.pem",
+      "security_level": 140,
+      "enabled": true,
+      "priority": 7,
+      "performance_score": 65
+    },
+    
+    "MLDSA44-RSA2048-PKCS15-SHA256": {
+      "config_id": "cert_20",
+      "tls_code": 1025,
+      "classical_alg": "rsa",
+      "pq_alg": "ML-DSA-44",
+      "classical_alg_family": "rsa-2048-pkcs1",
+      "pq_key_family": "mldsa44",
+      "tls_name": "RSA-PKCS1-SHA256",
+      "key_size": 2048,
+      "hash_alg": "sha256",
+      "padding": "pkcs1",
+      "oid": "1.3.6.1.5.5.7.6.38",
+      "common_name": "CATALYST-MLDSA44-RSA2048-PKCS15-SHA256",
+      "cert_suffix": "_MLDSA44_RSA2048_PKCS15_SHA256",
+      "cert_file": "catalyst_cert_MLDSA44_RSA2048_PKCS15_SHA256.pem",
+      "security_level": 112,
+      "enabled": true,
+      "priority": 26,
+      "performance_score": 82
+    },
+    
+    "MLDSA44-RSA3072-PKCS15-SHA256": {
+      "config_id": "cert_21",
+      "tls_code": 1025,
+      "classical_alg": "rsa",
+      "pq_alg": "ML-DSA-44",
+      "classical_alg_family": "rsa-3072-pkcs1",
+      "pq_key_family": "mldsa44",
+      "tls_name": "RSA-PKCS1-SHA256",
+      "key_size": 3072,
+      "hash_alg": "sha256",
+      "padding": "pkcs1",
+      "oid": "1.3.6.1.4.1.2.267.999.5.1",
+      "common_name": "CATALYST-MLDSA44-RSA3072-PKCS15-SHA256",
+      "cert_suffix": "_MLDSA44_RSA3072_PKCS15_SHA256",
+      "cert_file": "catalyst_cert_MLDSA44_RSA3072_PKCS15_SHA256.pem",
+      "security_level": 128,
+      "enabled": true,
+      "priority": 25,
+      "performance_score": 72
+    },
+    
+    "MLDSA65-RSA3072-PKCS15-SHA384": {
+      "config_id": "cert_22",
+      "tls_code": 1281,
+      "classical_alg": "rsa",
+      "pq_alg": "ML-DSA-65",
+      "classical_alg_family": "rsa-3072-pkcs1",
+      "pq_key_family": "mldsa65",
+      "tls_name": "RSA-PKCS1-SHA384",
+      "key_size": 3072,
+      "hash_alg": "sha384",
+      "padding": "pkcs1",
+      "oid": "1.3.6.1.5.5.7.6.42",
+      "common_name": "CATALYST-MLDSA65-RSA3072-PKCS15-SHA384",
+      "cert_suffix": "_MLDSA65_RSA3072_PKCS15_SHA384",
+      "cert_file": "catalyst_cert_MLDSA65_RSA3072_PKCS15_SHA384.pem",
+      "security_level": 128,
+      "enabled": true,
+      "priority": 5,
+      "performance_score": 68
+    },
+    
+    "MLDSA65-RSA4096-PKCS15-SHA512": {
+      "config_id": "cert_23",
+      "tls_code": 1537,
+      "classical_alg": "rsa",
+      "pq_alg": "ML-DSA-65",
+      "classical_alg_family": "rsa-4096-pkcs1",
+      "pq_key_family": "mldsa65",
+      "tls_name": "RSA-PKCS1-SHA512",
+      "key_size": 4096,
+      "hash_alg": "sha512",
+      "padding": "pkcs1",
+      "oid": "1.3.6.1.5.5.7.6.44",
+      "common_name": "CATALYST-MLDSA65-RSA4096-PKCS15-SHA512",
+      "cert_suffix": "_MLDSA65_RSA4096_PKCS15_SHA512",
+      "cert_file": "catalyst_cert_MLDSA65_RSA4096_PKCS15_SHA512.pem",
+      "security_level": 140,
+      "enabled": true,
+      "priority": 4,
+      "performance_score": 63
+    }
+  },
+  
+  "certificate_groups": {
+    "highest_security": {
+      "description": "Maximum quantum and classical security",
+      "config_ids": ["cert_04", "cert_10", "cert_16"],
+      "min_security_level": 224,
+      "max_priority": 10
+    },
+    "balanced": {
+      "description": "Good balance of security and performance",
+      "config_ids": ["cert_03", "cert_07", "cert_08", "cert_09", "cert_13", "cert_15", "cert_19", "cert_22", "cert_23"],
+      "min_security_level": 128,
+      "max_security_level": 192
+    },
+    "compatibility": {
+      "description": "Maximum compatibility with legacy systems",
+      "config_ids": ["cert_01", "cert_05", "cert_11", "cert_12", "cert_17", "cert_18", "cert_20", "cert_21"],
+      "max_security_level": 128
+    },
+    "performance": {
+      "description": "Best performance (lower security)",
+      "config_ids": ["cert_01", "cert_02", "cert_05", "cert_06", "cert_11", "cert_20"],
+      "performance_score": 80,
+      "max_security_level": 128
+    }
+  },
+  
+  "selection_policies": {
+    "default": {
+      "prefer_higher_security": true,
+      "prefer_higher_performance": false,
+      "max_key_size": 4096,
+      "min_security_level": 112
+    },
+    "mobile": {
+      "prefer_higher_security": false,
+      "prefer_higher_performance": true,
+      "max_key_size": 3072,
+      "min_security_level": 112
+    },
+    "government": {
+      "prefer_higher_security": true,
+      "prefer_higher_performance": false,
+      "max_key_size": 4096,
+      "min_security_level": 192
+    }
+  },
+  
+  "logging": {
+    "level": "INFO",
+    "file": "catalyst_server.log",
+    "handshake_details": true,
+    "certificate_selection": true,
+    "key_sharing_info": true,
+    "performance_metrics": true
+  }
+}
