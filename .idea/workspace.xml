@@ -3,10 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="286346ea-a929-44f3-a3a2-a0c991f3e25e" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/http3_client.py" beforeDir="false" afterPath="$PROJECT_DIR$/examples/http3_client.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server_config.json" beforeDir="false" afterPath="$PROJECT_DIR$/server_config.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/handshake_times.csv" beforeDir="false" afterPath="$PROJECT_DIR$/handshake_times.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/session_ticket.bin" beforeDir="false" afterPath="$PROJECT_DIR$/session_ticket.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Hypic/quic/configuration.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/Hypic/quic/configuration.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Hypic/tls.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/Hypic/tls.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -28,6 +26,7 @@
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.http3_client.executor&quot;: &quot;Debug&quot;,
     &quot;Python.http3_server.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
@@ -38,7 +37,30 @@
     &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
   }
 }</component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python.http3_client">
+    <configuration name="http3_client" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Hypic" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/examples" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="RUN_TOOL" value="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/examples/http3_client.py" />
+      <option name="PARAMETERS" value="--insecure  https://localhost:4433/ --enable-pq kyber768 --max-rpqh-period 60" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="http3_server" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Hypic" />
       <option name="ENV_FILES" value="" />
@@ -62,8 +84,13 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <list>
+      <item itemvalue="Python.http3_client" />
+      <item itemvalue="Python.http3_server" />
+    </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.http3_client" />
         <item itemvalue="Python.http3_server" />
       </list>
     </recent_temporary>
@@ -84,5 +111,36 @@
       <updated>1769527884987</updated>
     </task>
     <servers />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/Hypic/tls.py</url>
+          <line>850</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/Hypic/tls.py</url>
+          <line>851</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/Hypic/tls.py</url>
+          <line>588</line>
+          <option name="timeStamp" value="22" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/Hypic/tls.py</url>
+          <line>589</line>
+          <option name="timeStamp" value="23" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/Hypic/tls.py</url>
+          <line>590</line>
+          <option name="timeStamp" value="24" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

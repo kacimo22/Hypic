@@ -342,13 +342,11 @@ class Group(IntEnum):
     X25519 = 0x001D
     X448 = 0x001E
     GREASE = 0xAAAA
-    # PQ KEM "group ids" (private range) - now part of KEY_SHARE extension
-    KEM_KYBER512 = 0xFE10
-    KEM_KYBER768 = 0xFE12
-    KEM_KYBER1024 = 0xFE14
+
 
 
 class Kem_Id_Mode(IntEnum):
+    # PQ KEM "group ids" (private range) - now part of KEY_SHARE extension
     KEM_KYBER512_PK = 0xFE10
     KEM_KYBER512_CT = 0xFE11
     KEM_KYBER768_PK = 0xFE12
@@ -1755,11 +1753,11 @@ class Context:
         ]
         self._supported_groups =[]
         if enable_pq and pq_kem == "KYBER512":
-            self._supported_groups.append(Group.KEM_KYBER512)
+            self._supported_groups.append(Kem_Id_Mode.KEM_KYBER512_PK)
         elif enable_pq and pq_kem == "KYBER768":
-            self._supported_groups.append(Group.KEM_KYBER768)
+            self._supported_groups.append(Kem_Id_Mode.KEM_KYBER768_PK)
         elif enable_pq and pq_kem == "KYBER1024":
-            self._supported_groups.append(Group.KEM_KYBER1024)
+            self._supported_groups.append(Kem_Id_Mode.KEM_KYBER1024_PK)
         if default_backend().ed25519_supported():
             self._signature_algorithms.append(SignatureAlgorithm.ED25519)
         if default_backend().ed448_supported():
@@ -2095,7 +2093,7 @@ class Context:
         supported_groups: List[int] = []
 
         for group in self._supported_groups:
-            if group == Group.KEM_KYBER512:
+            if group == Kem_Id_Mode.KEM_KYBER512_PK:
                 def extract_kyber_pk(ticket):
                     """Return Kyber pK from ticket if it exists and is 800 bytes, else None."""
                     if not ticket or not ticket.is_valid or not self._VALID_TIME_RPQH:
@@ -2126,9 +2124,9 @@ class Context:
                                       kyber_pk_or_ct_to_bytes(kyber_pub)))
 
 
-                supported_groups.append(Group.KEM_KYBER512)
+                supported_groups.append(Kem_Id_Mode.KEM_KYBER512_PK)
 
-            elif group == Group.KEM_KYBER768:
+            elif group == Kem_Id_Mode.KEM_KYBER768_PK:
                 def extract_kyber_pk(ticket):
                     """Return Kyber pK from ticket if it exists and is 1184 bytes, else None."""
                     if not ticket or not ticket.is_valid or not self._VALID_TIME_RPQH:
@@ -2159,8 +2157,8 @@ class Context:
                                       kyber_pk_or_ct_to_bytes(kyber_pub)))
 
 
-                supported_groups.append(Group.KEM_KYBER768)
-            elif group == Group.KEM_KYBER1024:
+                supported_groups.append(Kem_Id_Mode.KEM_KYBER768_PK)
+            elif group == Kem_Id_Mode.KEM_KYBER1024_PK:
                 def extract_kyber_pk(ticket):
                     """Return Kyber pK from ticket if it exists and is 1568 bytes, else None."""
                     if not ticket or not ticket.is_valid or not self._VALID_TIME_RPQH:
@@ -2190,7 +2188,7 @@ class Context:
                     key_share.append((Kem_Id_Mode.KEM_KYBER1024_PK.value,
                                       kyber_pk_or_ct_to_bytes(kyber_pub)))
 
-                supported_groups.append(Group.KEM_KYBER1024)
+                supported_groups.append(Kem_Id_Mode.KEM_KYBER1024_PK)
 
             elif group == Group.X25519:
                 self._x25519_private_key = x25519.X25519PrivateKey.generate()
