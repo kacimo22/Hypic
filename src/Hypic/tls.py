@@ -178,19 +178,19 @@ class State(Enum):
 def hkdf_label(label: bytes, hash_value: bytes, length: int) -> bytes:
     full_label = b"tls13 " + label
     return (
-        struct.pack("!HB", length, len(full_label))
-        + full_label
-        + struct.pack("!B", len(hash_value))
-        + hash_value
+            struct.pack("!HB", length, len(full_label))
+            + full_label
+            + struct.pack("!B", len(hash_value))
+            + hash_value
     )
 
 
 def hkdf_expand_label(
-    algorithm: hashes.HashAlgorithm,
-    secret: bytes,
-    label: bytes,
-    hash_value: bytes,
-    length: int,
+        algorithm: hashes.HashAlgorithm,
+        secret: bytes,
+        label: bytes,
+        hash_value: bytes,
+        length: int,
 ) -> bytes:
     return HKDFExpand(
         algorithm=algorithm,
@@ -200,7 +200,7 @@ def hkdf_expand_label(
 
 
 def hkdf_extract(
-    algorithm: hashes.HashAlgorithm, salt: bytes, key_material: bytes
+        algorithm: hashes.HashAlgorithm, salt: bytes, key_material: bytes
 ) -> bytes:
     h = hmac.HMAC(salt, algorithm)
     h.update(key_material)
@@ -208,7 +208,7 @@ def hkdf_extract(
 
 
 def load_pem_private_key(
-    data: bytes, password: Optional[bytes] = None
+        data: bytes, password: Optional[bytes] = None
 ) -> PrivateKeyTypes:
     """
     Load a PEM-encoded private key.
@@ -229,12 +229,12 @@ def load_pem_x509_certificates(data: bytes) -> List[x509.Certificate]:
 
 
 def verify_certificate(
-    certificate: x509.Certificate,
-    chain: List[x509.Certificate] = [],
-    server_name: Optional[str] = None,
-    cadata: Optional[bytes] = None,
-    cafile: Optional[str] = None,
-    capath: Optional[str] = None,
+        certificate: x509.Certificate,
+        chain: List[x509.Certificate] = [],
+        server_name: Optional[str] = None,
+        cadata: Optional[bytes] = None,
+        cafile: Optional[str] = None,
+        capath: Optional[str] = None,
 ) -> None:
     # verify dates
     now = utcnow()
@@ -263,8 +263,8 @@ def verify_certificate(
                 )
 
         except (
-            service_identity.CertificateError,
-            service_identity.VerificationError,
+                service_identity.CertificateError,
+                service_identity.VerificationError,
         ) as exc:
             patterns = service_identity.cryptography.extract_patterns(certificate)
             if len(patterns) == 0:
@@ -332,7 +332,7 @@ class ExtensionType(IntEnum):
     QUIC_TRANSPORT_PARAMETERS = 0x0039
     QUIC_TRANSPORT_PARAMETERS_DRAFT = 0xFFA5
     ENCRYPTED_SERVER_NAME = 65486
-    PQ_KEY_SHARE = 0xFE01  # custom PQ KEM public key / ciphertext extension
+    PQ_KEY_SHARE = 0xFE01
 
 
 class Group(IntEnum):
@@ -342,14 +342,11 @@ class Group(IntEnum):
     X25519 = 0x001D
     X448 = 0x001E
     GREASE = 0xAAAA
-    # PQ KEM “group ids” (private range)
+    # PQ KEM "group ids" (private range) - now part of KEY_SHARE extension
     KEM_KYBER512 = 0xFE10
     KEM_KYBER768 = 0xFE12
     KEM_KYBER1024 = 0xFE14
 
-class Kem_Mode(IntEnum):
-    KYBER_PK = 0x0000
-    KYBER_CT = 0x0001
 
 class Kem_Id_Mode(IntEnum):
     KEM_KYBER512_PK = 0xFE10
@@ -359,7 +356,7 @@ class Kem_Id_Mode(IntEnum):
     KEM_KYBER1024_PK = 0xFE14
     KEM_KYBER1024_CT = 0xFE15
 
-#check if ed25519, ed448 and mldsa are supported
+
 def hybrid_algorithms_supported():
     """
     Returns True if the system supports hybrid signature algorithms
@@ -391,12 +388,12 @@ def hybrid_algorithms_supported():
                 else:
                     return False
     except (subprocess.SubprocessError, FileNotFoundError, IndexError, ValueError):
-         return False
+        return False
 
 
-
-# KeyShareEntry
+# KeyShareEntry - now contains both classical and PQ key shares
 KeyShareEntry = Tuple[int, bytes]
+
 
 def kyber_pk_or_ct_to_bytes(data) -> bytes:
     """
@@ -410,8 +407,8 @@ def kyber_pk_or_ct_to_bytes(data) -> bytes:
             return bytes([x % 256 for x in data])  # ensure 0..255
         else:
             raise TypeError("Unsupported type for kyber key")
-    else: return b'0'
-
+    else:
+        return b'0'
 
 
 def kyber_bytes_to_pk_or_ct(data: bytes, dtype=np.int8):
@@ -419,28 +416,24 @@ def kyber_bytes_to_pk_or_ct(data: bytes, dtype=np.int8):
     Convert raw bytes back into a numpy array of signed integers.
     """
     arr = np.frombuffer(data, dtype=dtype)
-    return arr.tolist() # force 1D
-
-def pq_key_share_to_bytes(data:Tuple[int, bytes]):
-    pq_entry = data[0].to_bytes(2, "big") + len(data[1]).to_bytes(2, "big") + data[1]
-    return pq_entry
-
+    return arr.tolist()  # force 1D
 
 
 def build_pq_key_share(kem_id_mode: int, data) -> KeyShareEntry:
     """
-    Build a PQ_key_share entry.
-
-    data: Kyber pk (list[int] or bytes) or Kyber ct (list[int] or bytes)
-    mode: "pk" or "ct"
+    Build a PQ key share entry for inclusion in KEY_SHARE extension.
     """
-
     if isinstance(data, bytes):
         data_bytes = data
     else:
-        data_bytes=kyber_pk_or_ct_to_bytes(data)
+        data_bytes = kyber_pk_or_ct_to_bytes(data)
+    return (kem_id_mode, data_bytes)
 
-    return  (kem_id_mode,data_bytes)
+
+def is_pq_key_share(key_share: KeyShareEntry) -> bool:
+    """Check if a key share entry is for PQ KEM."""
+    group_id = key_share[0]
+    return group_id in [mode.value for mode in Kem_Id_Mode]
 
 def parse_pq_key_share(pq_entry: Tuple[int,bytes]):
     """
@@ -454,12 +447,13 @@ def parse_pq_key_share(pq_entry: Tuple[int,bytes]):
     kyber_entry=kyber_bytes_to_pk_or_ct(data=kyber_entry_bytes, dtype=np.int8)
     return kem_id_mode, kyber_entry
 
-def combine_kyber_ecdh(kyber_ss, ecdh_ss: bytes) -> bytes:
-    """
-    Produce a single hybrid shared secret from KEM and ECDH.
-    """
-    hybrid_ss = kyber_pk_or_ct_to_bytes(kyber_ss) + ecdh_ss
-    return hybrid_ss
+def get_kem_mode_from_group(group_id: int) -> Optional[Kem_Id_Mode]:
+    """Get the Kem_Id_Mode enum value from a group ID."""
+    for mode in Kem_Id_Mode:
+        if mode.value == group_id:
+            return mode
+    return None
+
 
 class HandshakeType(IntEnum):
     CLIENT_HELLO = 1
@@ -511,7 +505,6 @@ class SignatureAlgorithm(IntEnum):
     RSA_PKCS1_SHA1 = 0x0201
     SHA1_DSA = 0x0202
     ECDSA_SHA1 = 0x0203
-
 
     @classmethod
     def get_name(cls, code):
@@ -590,7 +583,7 @@ def pull_list(buf: Buffer, capacity: int, func: Callable[[], T]) -> List[T]:
 
 
 def push_list(
-    buf: Buffer, capacity: int, func: Callable[[T], None], values: Sequence[T]
+        buf: Buffer, capacity: int, func: Callable[[T], None], values: Sequence[T]
 ) -> None:
     """
     Push a list of items.
@@ -644,19 +637,17 @@ def push_server_name(buf: Buffer, server_name: str) -> None:
 
 
 def pull_key_share(buf: Buffer) -> KeyShareEntry:
+    """Pull a key share entry (can be classical or PQ)."""
     group = buf.pull_uint16()
     data = pull_opaque(buf, 2)
     return (group, data)
 
-def pull_pq_key_share(buf: Buffer) -> Tuple[int, bytes]:
-    kem_id_mode = buf.pull_uint16()
-    kyber_entry = pull_opaque(buf, 2)
-    return (kem_id_mode,kyber_entry)
-
 
 def push_key_share(buf: Buffer, value: KeyShareEntry) -> None:
+    """Push a key share entry (can be classical or PQ)."""
     buf.push_uint16(value[0])
     push_opaque(buf, 2, value[1])
+
 
 # ALPN
 
@@ -757,6 +748,8 @@ class SessionTicket:
 
 
 Extension = Tuple[int, bytes]
+
+
 @dataclass
 class ClientHello:
     random: bytes
@@ -767,15 +760,13 @@ class ClientHello:
     # extensions
     alpn_protocols: Optional[List[str]] = None
     early_data: bool = False
-    key_share: Optional[List[KeyShareEntry]] = None
+    key_share: Optional[List[KeyShareEntry]] = None  # Now contains both classical and PQ
     pre_shared_key: Optional[OfferedPsks] = None
     psk_key_exchange_modes: Optional[List[int]] = None
     server_name: Optional[str] = None
     signature_algorithms: Optional[List[int]] = None
     supported_groups: Optional[List[int]] = None
     supported_versions: Optional[List[int]] = None
-    # new: PQ key share from client (kem_id_with_mode, blob)
-    pq_key_share: Optional[KeyShareEntry] = None
     other_extensions: List[Extension] = field(default_factory=list)
 
 
@@ -816,10 +807,8 @@ def pull_client_hello(buf: Buffer) -> ClientHello:
             extension_type = buf.pull_uint16()
             extension_length = buf.pull_uint16()
             if extension_type == ExtensionType.KEY_SHARE:
+                # All key shares (both classical and PQ) are in the same list
                 hello.key_share = pull_list(buf, 2, partial(pull_key_share, buf))
-            elif extension_type == ExtensionType.PQ_KEY_SHARE:
-                # new: single PQKeyShare entry
-                hello.pq_key_share = pull_pq_key_share(buf)
             elif extension_type == ExtensionType.SUPPORTED_VERSIONS:
                 hello.supported_versions = pull_list(buf, 1, buf.pull_uint16)
             elif extension_type == ExtensionType.SIGNATURE_ALGORITHMS:
@@ -860,16 +849,10 @@ def push_client_hello(buf: Buffer, hello: ClientHello) -> None:
 
         # extensions
         with push_block(buf, 2):
-            with push_extension(buf, ExtensionType.KEY_SHARE):
-                push_list(buf, 2, partial(push_key_share, buf), hello.key_share)
+            if hello.key_share is not None:
+                with push_extension(buf, ExtensionType.KEY_SHARE):
+                    push_list(buf, 2, partial(push_key_share, buf), hello.key_share)
 
-                # supported versions, signature algs, supported_groups, etc...
-                # then emit PQ key share if present:
-            if hello.pq_key_share is not None:
-                with push_extension(buf, ExtensionType.PQ_KEY_SHARE):
-                        # we defined a single entry format (2 byte kem id + opaque blob)
-                        # push_pq_key_share(buf, hello.pq_key_share)
-                    buf.push_bytes(pq_key_share_to_bytes(hello.pq_key_share))
             with push_extension(buf, ExtensionType.SUPPORTED_VERSIONS):
                 push_list(buf, 1, buf.push_uint16, hello.supported_versions)
 
@@ -906,6 +889,7 @@ def push_client_hello(buf: Buffer, hello: ClientHello) -> None:
                 with push_extension(buf, ExtensionType.PRE_SHARED_KEY):
                     push_offered_psks(buf, hello.pre_shared_key)
 
+
 @dataclass
 class ServerHello:
     random: bytes
@@ -914,8 +898,7 @@ class ServerHello:
     compression_method: int
 
     # extensions
-    key_share: Optional[KeyShareEntry] = None
-    pq_key_share: Optional[KeyShareEntry] = None   # server's PQ response (kem_id_with_mode, blob)
+    key_share: Optional[List[KeyShareEntry]] = None  # Now contains both classical and PQ
     pre_shared_key: Optional[int] = None
     supported_version: Optional[int] = None
     other_extensions: List[Tuple[int, bytes]] = field(default_factory=list)
@@ -941,9 +924,7 @@ def pull_server_hello(buf: Buffer) -> ServerHello:
             if extension_type == ExtensionType.SUPPORTED_VERSIONS:
                 hello.supported_version = buf.pull_uint16()
             elif extension_type == ExtensionType.KEY_SHARE:
-                hello.key_share = pull_key_share(buf)
-            elif extension_type == ExtensionType.PQ_KEY_SHARE:
-                hello.pq_key_share = pull_pq_key_share(buf)
+                hello.key_share = pull_list(buf, 2, partial(pull_key_share, buf))
             elif extension_type == ExtensionType.PRE_SHARED_KEY:
                 hello.pre_shared_key = buf.pull_uint16()
             else:
@@ -974,11 +955,7 @@ def push_server_hello(buf: Buffer, hello: ServerHello) -> None:
 
             if hello.key_share is not None:
                 with push_extension(buf, ExtensionType.KEY_SHARE):
-                    push_key_share(buf, hello.key_share)
-
-            if hello.pq_key_share is not None:
-                with push_extension(buf, ExtensionType.PQ_KEY_SHARE):
-                    buf.push_bytes(pq_key_share_to_bytes(hello.pq_key_share))
+                    push_list(buf, 2, partial(push_key_share, buf), hello.key_share)
 
             if hello.pre_shared_key is not None:
                 with push_extension(buf, ExtensionType.PRE_SHARED_KEY):
@@ -1041,7 +1018,6 @@ def push_new_session_ticket(buf: Buffer, new_session_ticket: NewSessionTicket) -
             for extension_type, extension_value in new_session_ticket.other_extensions:
                 with push_extension(buf, extension_type):
                     buf.push_bytes(extension_value)
-
 
 
 @dataclass
@@ -1173,7 +1149,7 @@ def pull_certificate_request(buf: Buffer) -> CertificateRequest:
 
 
 def push_certificate_request(
-    buf: Buffer, certificate_request: CertificateRequest
+        buf: Buffer, certificate_request: CertificateRequest
 ) -> None:
     buf.push_uint8(HandshakeType.CERTIFICATE_REQUEST)
     with push_block(buf, 3):
@@ -1305,6 +1281,7 @@ class CertificateVerify:
             # Decoding failed, return as-is
             return self.signature, None
 
+
 def pull_certificate_verify(buf: Buffer) -> CertificateVerify:
     pull_handshake_type(buf, HandshakeType.CERTIFICATE_VERIFY)
     with pull_block(buf, 3):
@@ -1319,7 +1296,6 @@ def push_certificate_verify(buf: Buffer, verify: CertificateVerify) -> None:
     with push_block(buf, 3):
         buf.push_uint16(verify.algorithm)
         push_opaque(buf, 2, verify.signature)
-
 
 
 @dataclass
@@ -1468,7 +1444,7 @@ SIGNATURE_ALGORITHMS: Dict = {
     SignatureAlgorithm.RSA_PSS_RSAE_SHA384: (padding.PSS, hashes.SHA384),
     SignatureAlgorithm.RSA_PSS_RSAE_SHA512: (padding.PSS, hashes.SHA512),
 
-    # RSA-PSS-PSS (PSS padding with PSS key) 
+    # RSA-PSS-PSS (PSS padding with PSS key)
     SignatureAlgorithm.RSA_PSS_PSS_SHA256: (padding.PSS, hashes.SHA256),
     SignatureAlgorithm.RSA_PSS_PSS_SHA384: (padding.PSS, hashes.SHA384),
     SignatureAlgorithm.RSA_PSS_PSS_SHA512: (padding.PSS, hashes.SHA512),
@@ -1489,24 +1465,28 @@ def cipher_suite_hash(cipher_suite: CipherSuite) -> hashes.HashAlgorithm:
 
 
 def decode_public_key(
-    key_share: KeyShareEntry,
+        key_share: KeyShareEntry,
 ) -> Union[ec.EllipticCurvePublicKey, x25519.X25519PublicKey, x448.X448PublicKey, None]:
-    if key_share[0] == Group.X25519:
+    group_id = key_share[0]
+
+    # Check if it's a classical group
+    if group_id == Group.X25519:
         return x25519.X25519PublicKey.from_public_bytes(key_share[1])
-    elif key_share[0] == Group.X448:
+    elif group_id == Group.X448:
         return x448.X448PublicKey.from_public_bytes(key_share[1])
-    elif key_share[0] in GROUP_TO_CURVE:
+    elif group_id in GROUP_TO_CURVE:
         return ec.EllipticCurvePublicKey.from_encoded_point(
-            GROUP_TO_CURVE[key_share[0]](), key_share[1]
+            GROUP_TO_CURVE[group_id](), key_share[1]
         )
     else:
+        # PQ key share or unknown group
         return None
 
 
 def encode_public_key(
-    public_key: Union[
-        ec.EllipticCurvePublicKey, x25519.X25519PublicKey, x448.X448PublicKey
-    ],
+        public_key: Union[
+            ec.EllipticCurvePublicKey, x25519.X25519PublicKey, x448.X448PublicKey
+        ],
 ) -> KeyShareEntry:
     if isinstance(public_key, x25519.X25519PublicKey):
         return (Group.X25519, public_key.public_bytes(Encoding.Raw, PublicFormat.Raw))
@@ -1519,7 +1499,7 @@ def encode_public_key(
 
 
 def negotiate(
-    supported: List[T], offered: Optional[List[Any]], exc: Optional[Alert] = None
+        supported: List[T], offered: Optional[List[Any]], exc: Optional[Alert] = None
 ) -> T:
     if offered is not None:
         for c in supported:
@@ -1530,17 +1510,18 @@ def negotiate(
         raise exc
     return None
 
+
 @contextmanager
 def push_message(
-    key_schedule: Union[KeySchedule, KeyScheduleProxy], buf: Buffer
+        key_schedule: Union[KeySchedule, KeyScheduleProxy], buf: Buffer
 ) -> Generator:
     hash_start = buf.tell()
     yield
     key_schedule.update_hash(buf.data_slice(hash_start, buf.tell()))
 
-def signature_algorithms_for_private_key(_is_client, server_config, private_key) -> List[SignatureAlgorithm]:
 
-        # No private key? Return empty
+def signature_algorithms_for_private_key(_is_client, server_config, private_key) -> List[SignatureAlgorithm]:
+    # No private key? Return empty
     if not private_key:
         return []
 
@@ -1554,7 +1535,8 @@ def signature_algorithms_for_private_key(_is_client, server_config, private_key)
         # Server with no config: use defaults
     return get_algorithms_for_key_type(private_key)
 
-def signature_algorithm_params( signature_algorithm: int, config: dict = None) -> Tuple:
+
+def signature_algorithm_params(signature_algorithm: int, config: dict = None) -> Tuple:
     if signature_algorithm in (SignatureAlgorithm.ED25519, SignatureAlgorithm.ED448):
         return tuple()
 
@@ -1564,12 +1546,13 @@ def signature_algorithm_params( signature_algorithm: int, config: dict = None) -
         return (ec.ECDSA(algorithm),)
     elif padding_cls == padding.PSS:
         padding_obj = padding_cls(
-                mgf=padding.MGF1(algorithm),
-                salt_length=padding.PSS.MAX_LENGTH
-            )
+            mgf=padding.MGF1(algorithm),
+            salt_length=padding.PSS.MAX_LENGTH
+        )
     else:
         padding_obj = padding_cls()
     return padding_obj, algorithm
+
 
 def get_algorithms_for_key_type(private_key) -> List[SignatureAlgorithm]:
     """Get algorithms based purely on key type (client-style)"""
@@ -1630,7 +1613,8 @@ def get_algorithms_from_config(server_config, private_key) -> List[SignatureAlgo
     except Exception as e:
         logging.debug(f"Config error: {e}")
 
-def sign_with_catalyst_config(priv_key,signature_algorithm:int, data: bytes, config: dict) -> bytes:
+
+def sign_with_catalyst_config(priv_key, signature_algorithm: int, data: bytes, config: dict) -> bytes:
     """Sign data using Catalyst configuration"""
     private_key = priv_key
 
@@ -1678,6 +1662,7 @@ def sign_with_catalyst_config(priv_key,signature_algorithm:int, data: bytes, con
             config
         ))
 
+
 # callback types
 AlpnHandler = Callable[[str], None]
 SessionTicketFetcher = Callable[[bytes], Optional[SessionTicket]]
@@ -1686,30 +1671,31 @@ SessionTicketHandler = Callable[[SessionTicket], None]
 
 class Context:
     def __init__(
-        self,
-        is_client: bool,
-        enable_pq:bool,
-        VALID_TIME_RPQH:Optional[bool]=None,
-        pq_kem=None,
-        alpn_protocols: Optional[List[str]] = None,
-        cadata: Optional[bytes] = None,
-        cafile: Optional[str] = None,
-        capath: Optional[str] = None,
-        cipher_suites: Optional[List[CipherSuite]] = None,
-        logger: Optional[Union[logging.Logger, logging.LoggerAdapter]] = None,
-        max_early_data: Optional[int] = None,
-        server_name: Optional[str] = None,
-        verify_mode: Optional[int] = None,
-        catalyst_manager=None,
-        certificate_dir=None,
-        catalyst_mode=None,
-        certificate: Optional[x509.Certificate] = None,
-        certificate_chain: List[x509.Certificate] = [],
-        certificate_private_key: Optional[
+            self,
+            is_client: bool,
+            enable_pq: bool,
+            VALID_TIME_RPQH: Optional[bool] = None,
+            pq_kem=None,
+            alpn_protocols: Optional[List[str]] = None,
+            cadata: Optional[bytes] = None,
+            cafile: Optional[str] = None,
+            capath: Optional[str] = None,
+            cipher_suites: Optional[List[CipherSuite]] = None,
+            logger: Optional[Union[logging.Logger, logging.LoggerAdapter]] = None,
+            max_early_data: Optional[int] = None,
+            server_name: Optional[str] = None,
+            verify_mode: Optional[int] = None,
+            catalyst_manager=None,
+            certificate_dir=None,
+            catalyst_mode=None,
+            certificate: Optional[x509.Certificate] = None,
+            certificate_chain: List[x509.Certificate] = [],
+            certificate_private_key: Optional[
                 Union[dsa.DSAPrivateKey, ec.EllipticCurvePrivateKey, rsa.RSAPrivateKey]
             ] = None
     ):
         # configuration
+
         self.CLIENT_START_TIME = time.perf_counter()
         self._alpn_protocols = alpn_protocols
         self._cadata = cadata
@@ -1717,9 +1703,9 @@ class Context:
         self._capath = capath
         self.handshake_extensions: List[Extension] = []
         self._is_client = is_client
-        self._enable_pq=enable_pq
-        self._VALID_TIME_RPQH=VALID_TIME_RPQH
-        self._pq_kem=pq_kem
+        self._enable_pq = enable_pq
+        self._VALID_TIME_RPQH = VALID_TIME_RPQH
+        self._pq_kem = pq_kem
         self._max_early_data = max_early_data
         self.session_ticket: Optional[SessionTicket] = None
         self._request_client_certificate = False  # For test purposes only
@@ -1729,10 +1715,9 @@ class Context:
         else:
             self._verify_mode = ssl.CERT_REQUIRED if is_client else ssl.CERT_NONE
 
-
         self._catalyst_manager = catalyst_manager
         self._certificate_dir = certificate_dir
-        self._catalyst_mode=catalyst_mode
+        self._catalyst_mode = catalyst_mode
 
         # callbacks
         self.alpn_cb: Optional[AlpnHandler] = None
@@ -1768,33 +1753,36 @@ class Context:
             SignatureAlgorithm.RSA_PKCS1_SHA512,
             SignatureAlgorithm.RSA_PKCS1_SHA1,
         ]
+        self._supported_groups =[]
+        if enable_pq and pq_kem == "KYBER512":
+            self._supported_groups.append(Group.KEM_KYBER512)
+        elif enable_pq and pq_kem == "KYBER768":
+            self._supported_groups.append(Group.KEM_KYBER768)
+        elif enable_pq and pq_kem == "KYBER1024":
+            self._supported_groups.append(Group.KEM_KYBER1024)
         if default_backend().ed25519_supported():
             self._signature_algorithms.append(SignatureAlgorithm.ED25519)
         if default_backend().ed448_supported():
             self._signature_algorithms.append(SignatureAlgorithm.ED448)
-        self._supported_groups = [Group.SECP256R1, Group.SECP384R1]
-        if enable_pq and pq_kem=="KYBER512":
-            self._supported_groups.append(Group.KEM_KYBER512)
-        elif enable_pq and pq_kem=="KYBER768":
-            self._supported_groups.append(Group.KEM_KYBER768)
-        elif enable_pq and pq_kem=="KYBER1024":
-            self._supported_groups.append(Group.KEM_KYBER1024)
+        self._supported_groups.append(Group.SECP256R1)
+        self._supported_groups.append(Group.SECP384R1)
         if default_backend().x25519_supported():
             self._supported_groups.append(Group.X25519)
         if default_backend().x448_supported():
             self._supported_groups.append(Group.X448)
         self._supported_versions = [TLS_VERSION_1_3]
-        self.config=None
+
+        self.config = None
 
         if self._catalyst_manager:
 
             if self._catalyst_mode == "explicit":
-                self.certificate=certificate
+                self.certificate = certificate
                 self.certificate_chain = certificate_chain
                 self.certificate_private_key = certificate_private_key
                 # Find Catalyst config for this certificate
                 self.config = self._catalyst_manager.server_config.find_config_for_certificate(
-                        self.certificate
+                    self.certificate
                 )
 
                 if not self.config:
@@ -1827,8 +1815,8 @@ class Context:
         self._Server_Res_kyber_private_key: Optional[List[int]] = None
         self._resumed_pq_key = None
         self._initial_pq_key = None
-        self._handshake_start_time=None
-        self._handshake_end_time=None
+        self._handshake_start_time = None
+        self._handshake_end_time = None
 
         if is_client:
             self.client_random = os.urandom(32)
@@ -1839,8 +1827,6 @@ class Context:
             self.legacy_session_id = None
             self.state = State.SERVER_EXPECT_CLIENT_HELLO
 
-
-
     @property
     def session_resumed(self) -> bool:
         """
@@ -1849,7 +1835,7 @@ class Context:
         return self._session_resumed
 
     def handle_message(
-        self, input_data: bytes, output_buf: Dict[Epoch, Buffer]
+            self, input_data: bytes, output_buf: Dict[Epoch, Buffer]
     ) -> None:
         if self.state == State.CLIENT_HANDSHAKE_START:
             self._client_send_hello(output_buf[Epoch.INITIAL])
@@ -1880,7 +1866,7 @@ class Context:
                 raise AlertDecodeError("Could not parse TLS message")
 
     def _handle_reassembled_message(
-        self, message_type: int, input_buf: Buffer, output_buf: Dict[Epoch, Buffer]
+            self, message_type: int, input_buf: Buffer, output_buf: Dict[Epoch, Buffer]
     ) -> None:
         # client states
 
@@ -1960,7 +1946,7 @@ class Context:
         assert input_buf.eof()
 
     def _build_session_ticket(
-        self, new_session_ticket: NewSessionTicket, other_extensions: List[Extension]
+            self, new_session_ticket: NewSessionTicket, other_extensions: List[Extension]
     ) -> SessionTicket:
         resumption_master_secret = self.key_schedule.derive_secret(b"res master")
         resumption_secret = hkdf_expand_label(
@@ -1970,11 +1956,11 @@ class Context:
             hash_value=new_session_ticket.ticket_nonce,
             length=self.key_schedule.algorithm.digest_size,
         )
-        extensions=None
+        extensions = None
         if self._is_client:
-            extensions= other_extensions+new_session_ticket.other_extensions
+            extensions = other_extensions + new_session_ticket.other_extensions
         else:
-            extensions= other_extensions
+            extensions = other_extensions
             extensions.append((ExtensionType.PQ_KEY_SHARE, kyber_pk_or_ct_to_bytes(self._Server_Res_kyber_private_key)))
 
         timestamp = utcnow()
@@ -1983,7 +1969,7 @@ class Context:
             cipher_suite=self.key_schedule.cipher_suite,
             max_early_data_size=new_session_ticket.max_early_data_size,
             not_valid_after=timestamp
-            + datetime.timedelta(seconds=new_session_ticket.ticket_lifetime),
+                            + datetime.timedelta(seconds=new_session_ticket.ticket_lifetime),
             not_valid_before=timestamp,
             other_extensions=extensions,
             resumption_secret=resumption_secret,
@@ -2066,7 +2052,6 @@ class Context:
 
             # Verify classical signature
             params = signature_algorithm_params(verify.algorithm)
-            
 
             public_key.verify(classical_sig, verify_data, *params)
 
@@ -2075,8 +2060,8 @@ class Context:
 
             # Verify ML-DSA signature if present and PQ is enabled
             if (pq_sig and
-                self._enable_pq and
-                self._cat_pq_public_key):
+                    self._enable_pq and
+                    self._cat_pq_public_key):
 
                 # ML-DSA signs: verify_data + classical_signature
                 data_for_mldsa = verify_data + classical_sig
@@ -2107,7 +2092,6 @@ class Context:
         # record handshake start
         self._handshake_start_time = time.perf_counter()
         key_share: List[KeyShareEntry] = []
-        pq_key_share: Optional[Tuple[int, bytes]] = None
         supported_groups: List[int] = []
 
         for group in self._supported_groups:
@@ -2129,13 +2113,18 @@ class Context:
                     self._resumed_pq_key, kyber_cipher = kem_encaps512(
                         kyber_bytes_to_pk_or_ct(kyber_pk_sess)
                     )
-                    pq_key_share = build_pq_key_share(Kem_Id_Mode.KEM_KYBER512_CT, kyber_cipher)
+                    # Add to key_share list as a PQ key share
+                    key_share.append((Kem_Id_Mode.KEM_KYBER512_CT.value,
+                                      kyber_pk_or_ct_to_bytes(kyber_cipher)))
                 else:
                     # Full handshake: generate fresh keypair
                     self.__logger.info(f"Trying Initial PQ Handshake using ML-KEM512")
                     kyber_priv, kyber_pub = kem_keygen512()
                     self._Client_kyber_private_key = kyber_priv
-                    pq_key_share = build_pq_key_share(Kem_Id_Mode.KEM_KYBER512_PK, kyber_pub)
+                    # Add to key_share list as a PQ key share
+                    key_share.append((Kem_Id_Mode.KEM_KYBER512_PK.value,
+                                      kyber_pk_or_ct_to_bytes(kyber_pub)))
+
 
                 supported_groups.append(Group.KEM_KYBER512)
 
@@ -2157,13 +2146,18 @@ class Context:
                     self._resumed_pq_key, kyber_cipher = kem_encaps768(
                         kyber_bytes_to_pk_or_ct(kyber_pk_sess)
                     )
-                    pq_key_share = build_pq_key_share(Kem_Id_Mode.KEM_KYBER768_CT, kyber_cipher)
+                    # Add to key_share list as a PQ key share
+                    key_share.append((Kem_Id_Mode.KEM_KYBER768_CT.value,
+                                      kyber_pk_or_ct_to_bytes(kyber_cipher)))
                 else:
                     # Full handshake: generate fresh keypair
                     self.__logger.info(f"Trying Initial PQ Handshake using ML-KEM768")
                     kyber_priv, kyber_pub = kem_keygen768()
                     self._Client_kyber_private_key = kyber_priv
-                    pq_key_share = build_pq_key_share(Kem_Id_Mode.KEM_KYBER768_PK, kyber_pub)
+                    # Add to key_share list as a PQ key share
+                    key_share.append((Kem_Id_Mode.KEM_KYBER768_PK.value,
+                                      kyber_pk_or_ct_to_bytes(kyber_pub)))
+
 
                 supported_groups.append(Group.KEM_KYBER768)
             elif group == Group.KEM_KYBER1024:
@@ -2184,24 +2178,30 @@ class Context:
                     self._resumed_pq_key, kyber_cipher = kem_encaps1024(
                         kyber_bytes_to_pk_or_ct(kyber_pk_sess)
                     )
-                    pq_key_share = build_pq_key_share(Kem_Id_Mode.KEM_KYBER1024_CT, kyber_cipher)
+                    # Add to key_share list as a PQ key share
+                    key_share.append((Kem_Id_Mode.KEM_KYBER1024_CT.value,
+                                      kyber_pk_or_ct_to_bytes(kyber_cipher)))
                 else:
                     # Full handshake: generate fresh keypair
                     self.__logger.info(f"Trying Initial PQ Handshake using ML-KEM1024")
                     kyber_priv, kyber_pub = kem_keygen1024()
                     self._Client_kyber_private_key = kyber_priv
-                    pq_key_share = build_pq_key_share(Kem_Id_Mode.KEM_KYBER1024_PK, kyber_pub)
+                    # Add to key_share list as a PQ key share
+                    key_share.append((Kem_Id_Mode.KEM_KYBER1024_PK.value,
+                                      kyber_pk_or_ct_to_bytes(kyber_pub)))
 
                 supported_groups.append(Group.KEM_KYBER1024)
 
             elif group == Group.X25519:
                 self._x25519_private_key = x25519.X25519PrivateKey.generate()
+                # Add classical key share to the same list
                 key_share.append(
                     encode_public_key(self._x25519_private_key.public_key())
                 )
                 supported_groups.append(Group.X25519)
             elif group == Group.X448:
                 self._x448_private_key = x448.X448PrivateKey.generate()
+                # Add classical key share to the same list
                 key_share.append(encode_public_key(self._x448_private_key.public_key()))
                 supported_groups.append(Group.X448)
             elif group == Group.GREASE:
@@ -2210,9 +2210,9 @@ class Context:
             elif group in GROUP_TO_CURVE:
                 ec_private_key = ec.generate_private_key(GROUP_TO_CURVE[group]())
                 self._ec_private_keys.append(ec_private_key)
+                # Add classical key share to the same list
                 key_share.append(encode_public_key(ec_private_key.public_key()))
                 supported_groups.append(group)
-
 
         assert len(key_share), "no key share entries"
 
@@ -2231,8 +2231,7 @@ class Context:
             cipher_suites=[int(x) for x in self._cipher_suites],
             legacy_compression_methods=self._legacy_compression_methods,
             alpn_protocols=self._alpn_protocols,
-            key_share=key_share,
-            pq_key_share=pq_key_share,
+            key_share=key_share,  # Contains both classical and PQ key shares
             psk_key_exchange_modes=(
                 self._psk_key_exchange_modes
                 if (self.session_ticket or self.new_session_ticket_cb is not None)
@@ -2249,7 +2248,8 @@ class Context:
 
         if self.session_ticket and self.session_ticket.is_valid:
             self._key_schedule_psk = KeySchedule(self.session_ticket.cipher_suite)
-            self._key_schedule_psk.extract(self.session_ticket.resumption_secret, key_material1=kyber_pk_or_ct_to_bytes(self._resumed_pq_key))
+            self._key_schedule_psk.extract(self.session_ticket.resumption_secret,
+                                           key_material1=kyber_pk_or_ct_to_bytes(self._resumed_pq_key))
             binder_key = self._key_schedule_psk.derive_secret(b"res binder")
             binder_length = self._key_schedule_psk.algorithm.digest_size
 
@@ -2287,7 +2287,8 @@ class Context:
                 )
 
         self._key_schedule_proxy = KeyScheduleProxy(self._cipher_suites)
-        self._key_schedule_proxy.extract(None, key_material1=kyber_pk_or_ct_to_bytes(self._resumed_pq_key))
+        self._key_schedule_proxy.extract(None,
+                                         key_material1=kyber_pk_or_ct_to_bytes(self._resumed_pq_key))
 
         with push_message(self._key_schedule_proxy, output_buf):
             push_client_hello(output_buf, hello)
@@ -2313,9 +2314,9 @@ class Context:
         # select key schedule
         if peer_hello.pre_shared_key is not None:
             if (
-                self._key_schedule_psk is None
-                or peer_hello.pre_shared_key != 0
-                or cipher_suite != self._key_schedule_psk.cipher_suite
+                    self._key_schedule_psk is None
+                    or peer_hello.pre_shared_key != 0
+                    or cipher_suite != self._key_schedule_psk.cipher_suite
             ):
                 raise AlertIllegalParameter
             self.key_schedule = self._key_schedule_psk
@@ -2326,45 +2327,40 @@ class Context:
         self._key_schedule_proxy = None
 
         # perform key exchange
-        peer_public_key = decode_public_key(peer_hello.key_share)
+        peer_public_key = decode_public_key(peer_hello.key_share[0])
         shared_key: Optional[bytes] = None
         if (
-            isinstance(peer_public_key, x25519.X25519PublicKey)
-            and self._x25519_private_key is not None
+                isinstance(peer_public_key, x25519.X25519PublicKey)
+                and self._x25519_private_key is not None
         ):
             shared_key = self._x25519_private_key.exchange(peer_public_key)
         elif (
-            isinstance(peer_public_key, x448.X448PublicKey)
-            and self._x448_private_key is not None
+                isinstance(peer_public_key, x448.X448PublicKey)
+                and self._x448_private_key is not None
         ):
             shared_key = self._x448_private_key.exchange(peer_public_key)
         elif isinstance(peer_public_key, ec.EllipticCurvePublicKey):
             for ec_private_key in self._ec_private_keys:
                 if (
-                    ec_private_key.public_key().curve.__class__
-                    == peer_public_key.curve.__class__
+                        ec_private_key.public_key().curve.__class__
+                        == peer_public_key.curve.__class__
                 ):
                     shared_key = ec_private_key.exchange(ec.ECDH(), peer_public_key)
         assert shared_key is not None
+        # perform pq key exchange
+        if len(peer_hello.key_share) > 1:
+            if (peer_hello.key_share[1] and self._Client_kyber_private_key is not None):
+                pq_key_share = peer_hello.key_share[1]
+                kem_id_mode, kyber_entry = parse_pq_key_share(pq_key_share)
+                if kem_id_mode == Kem_Id_Mode.KEM_KYBER512_CT:
+                    self._initial_pq_key = kem_decaps512(self._Client_kyber_private_key, kyber_entry)
 
-        #perform pq key exchange
-        if (self._enable_pq and peer_hello.pq_key_share is not None and self._Client_kyber_private_key is not None):
-            pq_key_share = peer_hello.pq_key_share
-            kem_id_mode, kyber_entry = parse_pq_key_share(pq_key_share)
-            if kem_id_mode == Kem_Id_Mode.KEM_KYBER512_CT:
-                self._initial_pq_key=kem_decaps512(self._Client_kyber_private_key, kyber_entry)
-                self.__logger.info("✅ Post-quantum Initial Handshake Enabled using ML-KEM-512")
-
-            elif kem_id_mode == Kem_Id_Mode.KEM_KYBER768_CT:
-                self._initial_pq_key=kem_decaps768(self._Client_kyber_private_key, kyber_entry)
-                self.__logger.info("✅ Post-quantum Initial Handshake Enabled using ML-KEM-768")
+                elif kem_id_mode == Kem_Id_Mode.KEM_KYBER768_CT:
+                    self._initial_pq_key = kem_decaps768(self._Client_kyber_private_key, kyber_entry)
 
 
-            elif kem_id_mode == Kem_Id_Mode.KEM_KYBER1024_CT:
-                self._initial_pq_key=kem_decaps1024(self._Client_kyber_private_key, kyber_entry)
-                self.__logger.info("✅ Post-quantum Initial Handshake Enabled using ML-KEM-1024")
-        else:
-            self.__logger.info("Server does not support post-quantum handshake") if self._enable_pq and not self._session_resumed else None
+                elif kem_id_mode == Kem_Id_Mode.KEM_KYBER1024_CT:
+                    self._initial_pq_key = kem_decaps1024(self._Client_kyber_private_key, kyber_entry)
         self.key_schedule.update_hash(input_buf.data)
         if self._resumed_pq_key is not None:
             self.key_schedule.extract(shared_key, kyber_pk_or_ct_to_bytes(self._resumed_pq_key))
@@ -2412,7 +2408,7 @@ class Context:
 
         # Set peer certificate
         self._set_peer_certificate(certificate)
-         # Perform classical certificate verification FIRST (required for Catalyst)
+        # Perform classical certificate verification FIRST (required for Catalyst)
         if self._verify_mode != ssl.CERT_NONE:
             verify_certificate(
                 cadata=self._cadata,
@@ -2430,7 +2426,6 @@ class Context:
         if self._peer_certificate and self._enable_pq:
             self._validate_catalyst_extension()
         self._set_state(State.CLIENT_EXPECT_CERTIFICATE_VERIFY)
-
 
     def _client_handle_certificate_verify(self, input_buf: Buffer) -> None:
         """Handle CertificateVerify message from server"""
@@ -2463,11 +2458,12 @@ class Context:
         if self._certificate_request is not None:
             # check whether we have a suitable signature algorithm
             if (
-                self.certificate is not None
-                and self.certificate_private_key is not None
+                    self.certificate is not None
+                    and self.certificate_private_key is not None
             ):
                 signature_algorithm = negotiate(
-                    signature_algorithms_for_private_key(self._is_client, self._catalyst_manager.server_config, self.certificate_private_key),
+                    signature_algorithms_for_private_key(self._is_client, self._catalyst_manager.server_config,
+                                                         self.certificate_private_key),
                     self._certificate_request.signature_algorithms,
                 )
             else:
@@ -2526,16 +2522,16 @@ class Context:
         self._handshake_end_time = time.perf_counter()
         if self._handshake_start_time is not None:
             handshake_duration = (self._handshake_end_time - self._handshake_start_time)
-            # self.__logger.info(
-            #     "Handshake completed in %.3f seconds", handshake_duration
-            # )
-            # HANDSHAKE_LOG = "handshake_times.csv"
-            # file_exists = os.path.isfile(HANDSHAKE_LOG)
-            # with open(HANDSHAKE_LOG, "a", newline="") as csvfile:
-            #     writer = csv.writer(csvfile)
-            #     if not file_exists:
-            #         writer.writerow(["timestamp", "handshake_duration"])
-            #     writer.writerow([int(time.perf_counter()), handshake_duration])
+            self.__logger.info(
+                "Handshake completed in %.3f seconds", handshake_duration
+            )
+            HANDSHAKE_LOG = "handshake_times.csv"
+            file_exists = os.path.isfile(HANDSHAKE_LOG)
+            with open(HANDSHAKE_LOG, "a", newline="") as csvfile:
+                writer = csv.writer(csvfile)
+                if not file_exists:
+                    writer.writerow(["timestamp", "handshake_duration"])
+                writer.writerow([int(time.perf_counter()), handshake_duration])
 
     def _client_handle_new_session_ticket(self, input_buf: Buffer) -> None:
         new_session_ticket = pull_new_session_ticket(input_buf)
@@ -2558,8 +2554,8 @@ class Context:
 
         # create a new session ticket
         if (
-            self.new_session_ticket_cb is not None
-            and self._psk_key_exchange_mode is not None
+                self.new_session_ticket_cb is not None
+                and self._psk_key_exchange_mode is not None
         ):
             self._new_session_ticket = NewSessionTicket(
                 ticket_lifetime=86400,
@@ -2568,22 +2564,24 @@ class Context:
                 ticket=os.urandom(64),
                 max_early_data_size=self._max_early_data,
             )
-            if self._enable_pq is True and self._pq_kem=="KYBER512":
+            if self._enable_pq is True and self._pq_kem == "KYBER512":
                 kyber_priv, kyber_pub = kem_keygen512()
                 self._Server_Res_kyber_private_key = kyber_priv
-                self._new_session_ticket.other_extensions.append((ExtensionType.PQ_KEY_SHARE, kyber_pk_or_ct_to_bytes(kyber_pub)))
-            elif self._enable_pq is True and self._pq_kem=="KYBER768":
+                self._new_session_ticket.other_extensions.append(
+                    (ExtensionType.PQ_KEY_SHARE, kyber_pk_or_ct_to_bytes(kyber_pub)))
+            elif self._enable_pq is True and self._pq_kem == "KYBER768":
                 kyber_priv, kyber_pub = kem_keygen768()
                 self._Server_Res_kyber_private_key = kyber_priv
-                self._new_session_ticket.other_extensions.append((ExtensionType.PQ_KEY_SHARE, kyber_pk_or_ct_to_bytes(kyber_pub)))
-            elif self._enable_pq is True and self._pq_kem=="KYBER1024":
+                self._new_session_ticket.other_extensions.append(
+                    (ExtensionType.PQ_KEY_SHARE, kyber_pk_or_ct_to_bytes(kyber_pub)))
+            elif self._enable_pq is True and self._pq_kem == "KYBER1024":
                 kyber_priv, kyber_pub = kem_keygen1024()
                 self._Server_Res_kyber_private_key = kyber_priv
-                self._new_session_ticket.other_extensions.append((ExtensionType.PQ_KEY_SHARE, kyber_pk_or_ct_to_bytes(kyber_pub)))
+                self._new_session_ticket.other_extensions.append(
+                    (ExtensionType.PQ_KEY_SHARE, kyber_pk_or_ct_to_bytes(kyber_pub)))
 
             # send message
             push_new_session_ticket(onertt_buf, self._new_session_ticket)
-
 
             # notify application
             ticket = self._build_session_ticket(
@@ -2591,19 +2589,17 @@ class Context:
             )
             self.new_session_ticket_cb(ticket)
 
-
-
         self._set_state(State.SERVER_EXPECT_FINISHED)
 
     def _server_handle_hello(
-        self,
-        input_buf: Buffer,
-        initial_buf: Buffer,
-        handshake_buf: Buffer,
-        onertt_buf: Buffer,
+            self,
+            input_buf: Buffer,
+            initial_buf: Buffer,
+            handshake_buf: Buffer,
+            onertt_buf: Buffer,
     ) -> None:
         peer_hello = pull_client_hello(input_buf)
-        signature_algorithm=None
+        signature_algorithm = None
 
         # negotiate parameters
         cipher_suite = negotiate(
@@ -2621,21 +2617,24 @@ class Context:
         )
 
         if self._catalyst_mode == "dynamic" or not self.config:
-            signature_algorithm, self.config = self._catalyst_manager.negotiator.select_signature_algorithm(self._catalyst_manager.server_config.get_server_preference_order(), peer_hello.signature_algorithms)
+            signature_algorithm, self.config = self._catalyst_manager.negotiator.select_signature_algorithm(
+                self._catalyst_manager.server_config.get_server_preference_order(), peer_hello.signature_algorithms)
             if not signature_algorithm or not self.config:
                 logging.error(f"❌ No common signature algorithm found!")
 
             # 2. Load private key
-            self.certificate_private_key, priv_path = self._catalyst_manager.negotiator.load_classical_private_key(self.config)
+            self.certificate_private_key, priv_path = self._catalyst_manager.negotiator.load_classical_private_key(
+                self.config)
 
             # 3. Load certificate chain
             chain, cert_path = self._catalyst_manager.negotiator.load_certificate_chain(self.config)
-            self.certificate=chain[0]
-            self.certificate_chain=chain[1:]
+            self.certificate = chain[0]
+            self.certificate_chain = chain[1:]
 
         elif self._catalyst_mode == "explicit" and self.certificate_private_key:
             signature_algorithm = negotiate(
-                signature_algorithms_for_private_key(self._is_client, self._catalyst_manager.server_config, self.certificate_private_key),
+                signature_algorithms_for_private_key(self._is_client, self._catalyst_manager.server_config,
+                                                     self.certificate_private_key),
                 peer_hello.signature_algorithms,
                 AlertHandshakeFailure("No supported signature algorithm"),
             )
@@ -2665,11 +2664,11 @@ class Context:
         # select key schedule
         pre_shared_key = None
         if (
-            self.get_session_ticket_cb is not None
-            and psk_key_exchange_mode is not None
-            and peer_hello.pre_shared_key is not None
-            and len(peer_hello.pre_shared_key.identities) == 1
-            and len(peer_hello.pre_shared_key.binders) == 1
+                self.get_session_ticket_cb is not None
+                and psk_key_exchange_mode is not None
+                and peer_hello.pre_shared_key is not None
+                and len(peer_hello.pre_shared_key.identities) == 1
+                and len(peer_hello.pre_shared_key.binders) == 1
         ):
             # ask application to find session ticket
             identity = peer_hello.pre_shared_key.identities[0]
@@ -2677,9 +2676,9 @@ class Context:
 
             # validate session ticket
             if (
-                session_ticket
-                and session_ticket.is_valid
-                and session_ticket.cipher_suite == cipher_suite
+                    session_ticket
+                    and session_ticket.is_valid
+                    and session_ticket.cipher_suite == cipher_suite
             ):
                 self.key_schedule = KeySchedule(cipher_suite)
                 kyber_sk_sess = None
@@ -2687,8 +2686,8 @@ class Context:
                     if ext_type == ExtensionType.PQ_KEY_SHARE:
                         kyber_sk_sess = ext_value
                         break
-                if peer_hello.pq_key_share is not None and kyber_sk_sess is not None:
-                    pq_key_share = peer_hello.pq_key_share
+                if self._enable_pq and peer_hello.key_share[0] and kyber_sk_sess is not None and is_pq_key_share(peer_hello.key_share[0]):
+                    pq_key_share = peer_hello.key_share[0]
 
                     # parse once
                     kem_id_mode, kyber_entry = parse_pq_key_share(pq_key_share)
@@ -2702,13 +2701,13 @@ class Context:
                     }
                     decap = decap_map.get(kem_id_mode)
                     if decap is None:
-                        raise ValueError("Server does not support post-quantum key exchange")
-                    if kem_id_mode==Kem_Id_Mode.KEM_KYBER512_CT.value:
-                        self._pq_kem="KYBER512"
-                    if kem_id_mode==Kem_Id_Mode.KEM_KYBER768_CT.value:
-                        self._pq_kem="KYBER768"
-                    if kem_id_mode==Kem_Id_Mode.KEM_KYBER1024_CT.value:
-                        self._pq_kem="KYBER1024"
+                        raise ValueError("Server does not support post-quantum")
+                    if kem_id_mode == Kem_Id_Mode.KEM_KYBER512_CT.value:
+                        self._pq_kem = "KYBER512"
+                    if kem_id_mode == Kem_Id_Mode.KEM_KYBER768_CT.value:
+                        self._pq_kem = "KYBER768"
+                    if kem_id_mode == Kem_Id_Mode.KEM_KYBER1024_CT.value:
+                        self._pq_kem = "KYBER1024"
 
                     # single decapsulation call
                     try:
@@ -2722,7 +2721,8 @@ class Context:
                         except Exception:
                             pass
 
-                self.key_schedule.extract(session_ticket.resumption_secret, key_material1=kyber_pk_or_ct_to_bytes(self._resumed_pq_key))
+                self.key_schedule.extract(session_ticket.resumption_secret,
+                                          key_material1=kyber_pk_or_ct_to_bytes(self._resumed_pq_key))
 
                 binder_key = self.key_schedule.derive_secret(b"res binder")
                 binder_length = self.key_schedule.algorithm.digest_size
@@ -2759,7 +2759,8 @@ class Context:
         # if PSK is not used, initialize key schedule
         if pre_shared_key is None:
             self.key_schedule = KeySchedule(cipher_suite)
-            self.key_schedule.extract(None, key_material1=kyber_pk_or_ct_to_bytes(self._resumed_pq_key))
+            self.key_schedule.extract(None,
+                                      key_material1=kyber_pk_or_ct_to_bytes(self._resumed_pq_key))
             self.key_schedule.update_hash(input_buf.data)
 
         # perform key exchange
@@ -2767,64 +2768,85 @@ class Context:
             ec.EllipticCurvePublicKey, x25519.X25519PublicKey, x448.X448PublicKey
         ]
         shared_key: Optional[bytes] = None
-        for key_share in peer_hello.key_share:
-            peer_public_key = decode_public_key(key_share)
-            if isinstance(peer_public_key, x25519.X25519PublicKey):
-                self._x25519_private_key = x25519.X25519PrivateKey.generate()
-                public_key = self._x25519_private_key.public_key()
-                shared_key = self._x25519_private_key.exchange(peer_public_key)
-                break
-            elif isinstance(peer_public_key, x448.X448PublicKey):
-                self._x448_private_key = x448.X448PrivateKey.generate()
-                public_key = self._x448_private_key.public_key()
-                shared_key = self._x448_private_key.exchange(peer_public_key)
-                break
-            elif isinstance(peer_public_key, ec.EllipticCurvePublicKey):
-                ec_private_key = ec.generate_private_key(GROUP_TO_CURVE[key_share[0]]())
-                self._ec_private_keys.append(ec_private_key)
-                public_key = ec_private_key.public_key()
-                shared_key = ec_private_key.exchange(ec.ECDH(), peer_public_key)
-                break
-        assert shared_key is not None
+        server_key_share: Optional[List[KeyShareEntry]] = []
 
-        _pq_key_share: Optional[Tuple[int, bytes]] = None
-        kyber_cipher=None
-        if self._enable_pq and peer_hello.pq_key_share and self._pq_session_resumed==False:
-            pq_key_share=peer_hello.pq_key_share
-            kem_id_mode, kyber_entry=parse_pq_key_share(pq_key_share)
-            if kem_id_mode==Kem_Id_Mode.KEM_KYBER512_PK:
-                self._pq_kem="KYBER512"
-                self._initial_pq_key, kyber_cipher = kem_encaps512(kyber_entry)
-                _pq_key_share = build_pq_key_share(Kem_Id_Mode.KEM_KYBER512_CT, kyber_cipher)
+        # Process all key shares from client
+        for key_share_entry in peer_hello.key_share or []:
+            group_id = key_share_entry[0]
 
-            elif kem_id_mode==Kem_Id_Mode.KEM_KYBER768_PK:
-                self._pq_kem = "KYBER768"
-                self._initial_pq_key, kyber_cipher = kem_encaps768(kyber_entry)
-                _pq_key_share = build_pq_key_share(Kem_Id_Mode.KEM_KYBER768_CT, kyber_cipher)
+            # Classical key share
+            if group_id in [Group.X25519, Group.X448] or group_id in GROUP_TO_CURVE:
+                peer_public_key = decode_public_key(key_share_entry)
+                if isinstance(peer_public_key, x25519.X25519PublicKey):
+                    self._x25519_private_key = x25519.X25519PrivateKey.generate()
+                    public_key = self._x25519_private_key.public_key()
+                    shared_key = self._x25519_private_key.exchange(peer_public_key)
+                    server_key_share.append(encode_public_key(public_key))
+                    break
+                elif isinstance(peer_public_key, x448.X448PublicKey):
+                    self._x448_private_key = x448.X448PrivateKey.generate()
+                    public_key = self._x448_private_key.public_key()
+                    shared_key = self._x448_private_key.exchange(peer_public_key)
+                    server_key_share.append(encode_public_key(public_key))
+                    break
+                elif isinstance(peer_public_key, ec.EllipticCurvePublicKey):
+                    ec_private_key = ec.generate_private_key(GROUP_TO_CURVE[group_id]())
+                    self._ec_private_keys.append(ec_private_key)
+                    public_key = ec_private_key.public_key()
+                    shared_key = ec_private_key.exchange(ec.ECDH(), peer_public_key)
+                    server_key_share.append(encode_public_key(public_key))
+                    break
 
-            elif kem_id_mode==Kem_Id_Mode.KEM_KYBER1024_PK:
-                self._pq_kem = "KYBER1024"
-                self._initial_pq_key, kyber_cipher = kem_encaps1024(kyber_entry)
-                _pq_key_share = build_pq_key_share(Kem_Id_Mode.KEM_KYBER1024_CT, kyber_cipher)
+            # PQ key share (client sending public key)
+            elif group_id in [Kem_Id_Mode.KEM_KYBER512_PK.value,
+                              Kem_Id_Mode.KEM_KYBER768_PK.value,
+                              Kem_Id_Mode.KEM_KYBER1024_PK.value] and self._enable_pq:
+                # Handle PQ key encapsulation
+                kyber_entry = kyber_bytes_to_pk_or_ct(key_share_entry[1])
+                if group_id == Kem_Id_Mode.KEM_KYBER512_PK.value:
+                    self._initial_pq_key, kyber_cipher = kem_encaps512(kyber_entry)
+                    # Build server's PQ key share response
+                    server_key_share.append((Kem_Id_Mode.KEM_KYBER512_CT.value,
+                                        kyber_pk_or_ct_to_bytes(kyber_cipher)))
+                    self._pq_kem = "KYBER512"
+                elif group_id == Kem_Id_Mode.KEM_KYBER768_PK.value:
+                    self._initial_pq_key, kyber_cipher = kem_encaps768(kyber_entry)
+                    # Build server's PQ key share response
+                    server_key_share.append((Kem_Id_Mode.KEM_KYBER768_CT.value,
+                                        kyber_pk_or_ct_to_bytes(kyber_cipher)))
+                    self._pq_kem = "KYBER768"
+                elif group_id == Kem_Id_Mode.KEM_KYBER1024_PK.value:
+                    self._initial_pq_key, kyber_cipher = kem_encaps1024(kyber_entry)
+                    # Build server's PQ key share response
+                    server_key_share.append((Kem_Id_Mode.KEM_KYBER1024_CT.value,
+                                        kyber_pk_or_ct_to_bytes(kyber_cipher)))
+                    self._pq_kem = "KYBER1024"
 
+        assert shared_key is not None or server_key_share is not None
 
+        if len(server_key_share) == 2:
+            server_key_share[0], server_key_share[1] = server_key_share[1], server_key_share[0]
         # send hello
         hello = ServerHello(
             random=self.server_random,
             legacy_session_id=self.legacy_session_id,
             cipher_suite=cipher_suite,
             compression_method=compression_method,
-            key_share=encode_public_key(public_key),
-            pq_key_share=_pq_key_share,
+            key_share=server_key_share,  # Could be classical or PQ response
             pre_shared_key=pre_shared_key,
             supported_version=supported_version,
         )
+
         with push_message(self.key_schedule, initial_buf):
             push_server_hello(initial_buf, hello)
+
+        # Update key schedule with both classical and PQ shared secrets
         if self._resumed_pq_key is not None:
-            self.key_schedule.extract(shared_key, kyber_pk_or_ct_to_bytes(self._resumed_pq_key))
+            self.key_schedule.extract(shared_key,
+                                      kyber_pk_or_ct_to_bytes(self._resumed_pq_key))
         elif self._initial_pq_key is not None:
-            self.key_schedule.extract(shared_key, kyber_pk_or_ct_to_bytes(self._initial_pq_key))
+            self.key_schedule.extract(shared_key,
+                                      kyber_pk_or_ct_to_bytes(self._initial_pq_key))
         else:
             self.key_schedule.extract(shared_key)
 
@@ -2876,8 +2898,9 @@ class Context:
                 SERVER_CONTEXT_STRING
             )
 
-            pq_signature=None
-            classical_signature = sign_with_catalyst_config(self.certificate_private_key, signature_algorithm, verify_data, self.config)
+            pq_signature = None
+            classical_signature = sign_with_catalyst_config(self.certificate_private_key, signature_algorithm,
+                                                            verify_data, self.config)
             if self._enable_pq and self.config and self.config.get("pq_alg"):
                 """Create hybrid CertificateVerify with both classical and ML-DSA signatures"""
 
@@ -2905,7 +2928,6 @@ class Context:
             # Send CertificateVerify
             with push_message(self.key_schedule, handshake_buf):
                 push_certificate_verify(handshake_buf, verify)
-
 
         # send finished
         with push_message(self.key_schedule, handshake_buf):
@@ -2941,7 +2963,7 @@ class Context:
             self._server_expect_finished(output_buf)
 
     def _server_handle_certificate_verify(
-        self, input_buf: Buffer, output_buf: Buffer
+            self, input_buf: Buffer, output_buf: Buffer
     ) -> None:
         verify = pull_certificate_verify(input_buf)
 
@@ -2971,7 +2993,7 @@ class Context:
         self._set_state(State.SERVER_POST_HANDSHAKE)
 
     def _setup_traffic_protection(
-        self, direction: Direction, epoch: Epoch, label: bytes
+            self, direction: Direction, epoch: Epoch, label: bytes
     ) -> None:
         key = self.key_schedule.derive_secret(label)
 
@@ -2997,4 +3019,3 @@ class Context:
         if self.__logger:
             self.__logger.debug("TLS %s -> %s", self.state, state)
         self.state = state
-

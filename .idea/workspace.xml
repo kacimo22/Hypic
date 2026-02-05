@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="286346ea-a929-44f3-a3a2-a0c991f3e25e" name="Changes" comment="" />
+    <list default="true" id="286346ea-a929-44f3-a3a2-a0c991f3e25e" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/http3_client.py" beforeDir="false" afterPath="$PROJECT_DIR$/examples/http3_client.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server_config.json" beforeDir="false" afterPath="$PROJECT_DIR$/server_config.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/session_ticket.bin" beforeDir="false" afterPath="$PROJECT_DIR$/session_ticket.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Hypic/quic/configuration.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/Hypic/quic/configuration.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Hypic/tls.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/Hypic/tls.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

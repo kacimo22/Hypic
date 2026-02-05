@@ -20,8 +20,8 @@ class QuicConfiguration:
     """
     A QUIC configuration.
     """
-    enable_pq = True
-    pq_kem = None
+    enable_pq = False
+    pq_kem = "KYBER768"
 
 
     alpn_protocols: Optional[List[str]] = None

@@ -28,7 +28,7 @@ from Hypic.quic.configuration import QuicConfiguration
 from Hypic.quic.events import QuicEvent
 from Hypic.quic.logger import QuicFileLogger
 from Hypic.quic.packet import QuicProtocolVersion
-from Hypic.tls import CipherSuite, SessionTicket
+from Hypic.tls import CipherSuite, SessionTicket, ExtensionType
 
 try:
     import uvloop
@@ -459,19 +459,27 @@ def save_session_ticket(ticket: SessionTicket) -> None:
         except Exception:
             data = None
 
+    enable_pq = None
+    for ext_type, ext_value in ticket.other_extensions:
+        if ext_type == ExtensionType.PQ_KEY_SHARE:
+            enable_pq = True
+            break
+
+
+
     if not data:
         # first time we get a ticket: mark first_full_time
         data = {
             "ticket": ticket,
             "first_full_time": now,
             "saved_time": now,
-            "enable_pq": QuicConfiguration.enable_pq
+            "enable_pq": enable_pq
         }
     else:
         # update ticket and saved_time, but keep the original first_full_time unchanged
         data["ticket"] = ticket
         data["saved_time"] = now
-        data["enable_pq"] = QuicConfiguration.enable_pq
+        data["enable_pq"] = enable_pq
 
     with open(TICKET_PATH, "wb") as f:
         pickle.dump(data, f)
