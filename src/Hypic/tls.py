@@ -2520,16 +2520,16 @@ class Context:
         self._handshake_end_time = time.perf_counter()
         if self._handshake_start_time is not None:
             handshake_duration = (self._handshake_end_time - self._handshake_start_time)
-            self.__logger.info(
-                "Handshake completed in %.3f seconds", handshake_duration
-            )
-            HANDSHAKE_LOG = "handshake_times.csv"
-            file_exists = os.path.isfile(HANDSHAKE_LOG)
-            with open(HANDSHAKE_LOG, "a", newline="") as csvfile:
-                writer = csv.writer(csvfile)
-                if not file_exists:
-                    writer.writerow(["timestamp", "handshake_duration"])
-                writer.writerow([int(time.perf_counter()), handshake_duration])
+            # self.__logger.info(
+            #     "Handshake completed in %.3f seconds", handshake_duration
+            # )
+            # HANDSHAKE_LOG = "handshake_times.csv"
+            # file_exists = os.path.isfile(HANDSHAKE_LOG)
+            # with open(HANDSHAKE_LOG, "a", newline="") as csvfile:
+            #     writer = csv.writer(csvfile)
+            #     if not file_exists:
+            #         writer.writerow(["timestamp", "handshake_duration"])
+            #     writer.writerow([int(time.perf_counter()), handshake_duration])
 
     def _client_handle_new_session_ticket(self, input_buf: Buffer) -> None:
         new_session_ticket = pull_new_session_ticket(input_buf)
