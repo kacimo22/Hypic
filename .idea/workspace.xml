@@ -3,9 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="286346ea-a929-44f3-a3a2-a0c991f3e25e" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/handshake_times.csv" beforeDir="false" afterPath="$PROJECT_DIR$/handshake_times.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/session_ticket.bin" beforeDir="false" afterPath="$PROJECT_DIR$/session_ticket.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Hypic/tls.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/Hypic/tls.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -115,16 +112,6 @@
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/Hypic/tls.py</url>
-          <line>850</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/Hypic/tls.py</url>
-          <line>851</line>
-          <option name="timeStamp" value="3" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/Hypic/tls.py</url>
           <line>588</line>

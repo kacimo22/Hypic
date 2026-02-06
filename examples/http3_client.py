@@ -270,7 +270,7 @@ async def perform_http_request(
     data: Optional[str],
     include: bool,
     output_dir: Optional[str],
-    handshake_time_ms: Optional[float] = None  # Add this parameter
+    handshake_time_ms: Optional[float] = None  
 ) -> None:
     # Get baseline RECEIVED bytes BEFORE this request
     rx_before = client.total_received_bytes
